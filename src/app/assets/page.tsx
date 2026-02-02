@@ -16,7 +16,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, X, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, ClipboardPlus, Eye, Replace, Download, Search, Filter, Pencil } from 'lucide-react';
+import { PlusCircle, X, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, ClipboardPlus, Eye, Replace, Download, Search, Filter, Pencil, Undo2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +60,7 @@ import AssetHistory from '@/components/dashboard/asset-history';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { assets, deletedAssets, users, companies } from '@/lib/mock-data';
+import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, companies } from '@/lib/mock-data';
 
 
 const computerAssetSchema = z.object({
@@ -696,6 +696,8 @@ interface AdvancedFilters {
 function ActivosPageComponent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const [activeAssets, setActiveAssets] = useState(initialAssets);
+  const [deletedAssets, setDeletedAssets] = useState(initialDeletedAssets);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
@@ -723,12 +725,11 @@ function ActivosPageComponent() {
 
     const assetIdToOpen = searchParams.get('openAssetId');
     if (assetIdToOpen) {
-        const assetToOpen = assets.find(asset => asset.id === assetIdToOpen);
+        const assetToOpen = activeAssets.find(asset => asset.id === assetIdToOpen);
         if (assetToOpen) {
             handleOpenDetailDialog(assetToOpen);
         }
     }
-    // We only want to run this on initial load based on URL params
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -801,13 +802,38 @@ function ActivosPageComponent() {
     setAssetToEdit(null);
   }
 
-  const handleDeleteAsset = (assetId: string) => {
-    console.log(`Deleting asset ${assetId}`);
-    toast({
+  const handleDeleteAsset = (assetId: string, reason: string) => {
+    const assetToMove = activeAssets.find(a => a.id === assetId);
+    if (assetToMove) {
+      setActiveAssets(prev => prev.filter(a => a.id !== assetId));
+      setDeletedAssets(prev => [
+        {
+          ...assetToMove,
+          deletionDate: format(new Date(), 'yyyy-MM-dd'),
+          reason: reason || 'Sin motivo especificado',
+        },
+        ...prev,
+      ]);
+      toast({
         title: 'Activo Dado de Baja',
         description: `El activo ${assetId} ha sido movido a la papelera.`
-    });
-  }
+      });
+    }
+  };
+
+  const handleRestoreAsset = (assetId: string) => {
+    const assetToRestore = deletedAssets.find(a => a.id === assetId);
+    if (assetToRestore) {
+      setDeletedAssets(prev => prev.filter(a => a.id !== assetId));
+      // remove deletion-specific fields before restoring
+      const { deletionDate, reason, ...restoredAsset } = assetToRestore;
+      setActiveAssets(prev => [restoredAsset as any, ...prev]);
+      toast({
+        title: 'Activo Restaurado',
+        description: `El activo ${assetId} ha sido restaurado al listado principal.`
+      });
+    }
+  };
   
   const handleAdvancedFilterChange = (filterName: keyof AdvancedFilters, value: string) => {
     setAdvancedFilters(prev => ({...prev, [filterName]: value}));
@@ -818,32 +844,30 @@ function ActivosPageComponent() {
   };
 
   const filteredAssets = useMemo(() => {
-    let assetsToFilter = assets;
+    let assetsToFilter = activeAssets;
 
     if (userRole === 'estandar' && userIdNumber) {
         const user = users.find(u => u.idNumber === userIdNumber);
         if (user) {
-            assetsToFilter = assets.filter(asset => asset.responsable === user.name);
+            assetsToFilter = assetsToFilter.filter(asset => asset.responsable === user.name);
         } else {
             assetsToFilter = [];
         }
     }
     
     return assetsToFilter.filter(asset => {
-      // Advanced filters
       const matchesResponsable = advancedFilters.responsable ? asset.responsable === advancedFilters.responsable : true;
       const matchesCompany = advancedFilters.company ? asset.company === advancedFilters.company : true;
       const matchesCategory = advancedFilters.category ? asset.category === advancedFilters.category : true;
       const matchesStatus = advancedFilters.status ? asset.status === advancedFilters.status : true;
 
-      // Simple search term filter
       const matchesSearchTerm = searchTerm ? Object.values(asset).some(value =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
       ) : true;
       
       return matchesResponsable && matchesCompany && matchesCategory && matchesStatus && matchesSearchTerm;
     });
-  }, [searchTerm, advancedFilters, userRole, userIdNumber]);
+  }, [searchTerm, advancedFilters, userRole, userIdNumber, activeAssets]);
 
   const filteredDeletedAssets = useMemo(() => {
     if (!searchTerm) return deletedAssets;
@@ -852,7 +876,7 @@ function ActivosPageComponent() {
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
-  }, [searchTerm]);
+  }, [searchTerm, deletedAssets]);
 
   const getAssetTypeForForm = (category: string): 'Equipo de cómputo' | 'Monitor' | 'UPS' | null => {
       switch (category) {
@@ -866,7 +890,7 @@ function ActivosPageComponent() {
               return null;
       }
   }
-
+  
   const isStandardUser = userRole === 'estandar';
 
 
@@ -1039,10 +1063,13 @@ function ActivosPageComponent() {
                                                       Introduce el motivo de la baja.
                                                   </AlertDialogDescription>
                                                   </AlertDialogHeader>
-                                                  <Textarea placeholder="Motivo de la baja (ej: dañado, obsoleto, etc.)" />
+                                                  <Textarea id={`delete-reason-${asset.id}`} placeholder="Motivo de la baja (ej: dañado, obsoleto, etc.)" />
                                                   <AlertDialogFooter>
                                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                  <AlertDialogAction onClick={() => handleDeleteAsset(asset.id)}>Confirmar Baja</AlertDialogAction>
+                                                  <AlertDialogAction onClick={() => {
+                                                    const reason = (document.getElementById(`delete-reason-${asset.id}`) as HTMLTextAreaElement)?.value;
+                                                    handleDeleteAsset(asset.id, reason);
+                                                  }}>Confirmar Baja</AlertDialogAction>
                                                   </AlertDialogFooter>
                                               </AlertDialogContent>
                                           </AlertDialog>
@@ -1083,7 +1110,7 @@ function ActivosPageComponent() {
                               <TableHead>Categoría</TableHead>
                               <TableHead>Fecha de Baja</TableHead>
                               <TableHead>Motivo</TableHead>
-                              <TableHead>Acciones</TableHead>
+                              <TableHead className="text-right">Acciones</TableHead>
                               </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1094,11 +1121,11 @@ function ActivosPageComponent() {
                                   <TableCell>{asset.category}</TableCell>
                                   <TableCell>{asset.deletionDate}</TableCell>
                                   <TableCell>{asset.reason}</TableCell>
-                                  <TableCell>
-                                  <Button variant="outline" size="sm">
-                                      <Trash2 className="mr-2 h-4 w-4" />
+                                  <TableCell className="text-right">
+                                    <Button variant="outline" size="sm" onClick={() => handleRestoreAsset(asset.id)}>
+                                      <Undo2 className="mr-2 h-4 w-4" />
                                       Restaurar
-                                  </Button>
+                                    </Button>
                                   </TableCell>
                               </TableRow>
                               ))}
