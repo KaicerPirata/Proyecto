@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
@@ -31,13 +30,17 @@ interface AssetsChartProps {
 }
 
 export default function AssetsChart({ assets }: AssetsChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const chartData = useMemo(() => {
     const departmentData: { [key: string]: number } = {};
 
     assets.forEach(asset => {
       const user = users.find(u => u.name === asset.responsable);
-      // Fallback to 'Sin Asignar' if user not found or department not specified
       const department = user?.department || 'Sin Asignar';
       if (departmentData[department]) {
         departmentData[department]++;
@@ -52,6 +55,20 @@ export default function AssetsChart({ assets }: AssetsChartProps) {
     }));
 
   }, [assets]);
+
+  if (!isMounted) {
+    return (
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle className="font-headline">Activos por Departamento</CardTitle>
+          <CardDescription>Cargando distribución de activos...</CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center min-h-[300px]">
+          <div className="h-full w-full bg-muted animate-pulse rounded-md" />
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="h-full">
