@@ -6,33 +6,37 @@ import { Loader2 } from 'lucide-react';
 
 export default function HomePage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const loggedIn = localStorage.getItem('isAuthenticated');
-    const userRole = localStorage.getItem('userRole');
+    setIsClient(true);
+    
+    // Usamos un pequeño delay para asegurar que la hidratación esté completa
+    const timeout = setTimeout(() => {
+      const loggedIn = localStorage.getItem('isAuthenticated');
+      const userRole = localStorage.getItem('userRole');
 
-    if (loggedIn === 'true') {
-      if (userRole === 'estandar') {
-        router.replace('/assets');
+      if (loggedIn === 'true') {
+        if (userRole === 'estandar') {
+          router.replace('/assets');
+        } else {
+          router.replace('/dashboard');
+        }
       } else {
-        router.replace('/dashboard');
+        router.replace('/login');
       }
-    } else {
-      router.replace('/login');
-    }
-  }, [router]);
+    }, 100);
 
-  if (!mounted) {
-    return null;
-  }
+    return () => clearTimeout(timeout);
+  }, [router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground animate-pulse">Iniciando sistema...</p>
+            <p className="text-sm text-muted-foreground animate-pulse">
+              {isClient ? "Verificando sesión..." : "Iniciando sistema..."}
+            </p>
         </div>
     </div>
   );

@@ -37,6 +37,8 @@ export default function AssetsChart({ assets }: AssetsChartProps) {
   }, []);
 
   const chartData = useMemo(() => {
+    if (!isMounted) return [];
+    
     const departmentData: { [key: string]: number } = {};
 
     assets.forEach(asset => {
@@ -54,7 +56,7 @@ export default function AssetsChart({ assets }: AssetsChartProps) {
       assets: departmentData[department]
     }));
 
-  }, [assets]);
+  }, [assets, isMounted]);
 
   if (!isMounted) {
     return (
