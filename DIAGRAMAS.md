@@ -1,121 +1,157 @@
-# Diagramas de Análisis - Activos Pro
+# Diagramas de Análisis Detallado - Activos Pro (Proyecto de Grado)
 
-Este documento contiene diagramas que refuerzan el análisis funcional y técnico de la aplicación, permitiendo visualizar la interacción entre los componentes del sistema.
+Este documento contiene la representación técnica y lógica de los procesos fundamentales del sistema "Activos Pro". Estos diagramas están diseñados para sustentar la arquitectura de software y el flujo de datos del proyecto.
 
-## 1. Diagrama de Secuencia: Autenticación (Login)
-
-Este diagrama describe el flujo desde que el usuario ingresa sus credenciales hasta que es redirigido al panel correspondiente según su rol.
+## 1. Diagrama de Secuencia: Autenticación y Control de Acceso
+Este diagrama detalla el proceso desde el intento de acceso hasta la persistencia de la sesión y la protección de rutas basada en roles (RBAC).
 
 ```mermaid
 sequenceDiagram
-    participant Usuario
-    participant PantallaLogin as Login Page
-    participant Almacenamiento as LocalStorage
-    participant Navegador as Router
+    autonumber
+    participant U as Usuario
+    participant L as Login Page (React)
+    participant V as Validador (Zod Schema)
+    participant M as Mock DB (users.ts)
+    participant S as LocalStorage
+    participant R as Router (Next.js)
 
-    Usuario->>PantallaLogin: Ingresa ID y Contraseña
-    PantallaLogin->>PantallaLogin: Validar credenciales (Mock Data)
-    
-    alt Credenciales Válidas
-        PantallaLogin->>Almacenamiento: Guardar userRole, userName, userId
-        PantallaLogin->>Almacenamiento: Set isAuthenticated = 'true'
-        PantallaLogin->>Navegador: Redirigir a '/'
-        Navegador->>Navegador: Evaluar Rol (Admin/Tech vs Estandar)
-        Navegador-->>Usuario: Muestra Dashboard o Lista de Activos
-    else Credenciales Inválidas
-        PantallaLogin-->>Usuario: Mostrar mensaje de error (Toast)
+    U->>L: Ingresa ID y Password
+    L->>V: Validar formato de entrada
+    alt Formato Inválido
+        V-->>L: Retornar errores de validación
+        L-->>U: Mostrar mensajes en campos (UI)
+    else Formato Válido
+        L->>M: Buscar usuario por ID
+        alt Credenciales Incorrectas
+            M-->>L: Usuario no encontrado / Clave errónea
+            L-->>U: Mostrar Toast Error ("Credenciales Inválidas")
+        else Credenciales Correctas
+            M-->>L: Retornar Objeto Usuario {rol, nombre, id, email}
+            L->>S: Guardar 'isAuthenticated': 'true'
+            L->>S: Persistir 'userRole', 'userName', 'userIdNumber'
+            L-->>U: Mostrar Toast Éxito ("Bienvenido...")
+            L->>R: Redirigir a '/'
+            R->>R: Evaluar Rol en HomePage
+            alt Es Admin/Técnico
+                R-->>U: Redirigir a '/dashboard'
+            else Es Estándar
+                R-->>U: Redirigir a '/assets' (Vista filtrada)
+            end
+        end
     end
 ```
 
 ---
 
-## 2. Diagrama de Secuencia: Registro de Nuevo Activo
-
-Muestra la interacción necesaria para ingresar un nuevo equipo al inventario, incluyendo la selección dinámica de formularios.
+## 2. Diagrama de Secuencia: Registro de Activo con Lógica Dinámica
+Detalla el flujo de creación de activos, resaltando la selección de formularios específicos según la categoría técnica.
 
 ```mermaid
 sequenceDiagram
-    participant Admin as Administrador / Técnico
-    participant VistaActivos as Página de Activos
-    participant Selector as Selector de Tipo
-    participant Formulario as Formulario Dinámico
-    participant Estado as Estado Local (Mock)
+    autonumber
+    participant T as Técnico / Admin
+    participant P as Página de Activos
+    participant D as Diálogo (CreateAsset)
+    participant S as Selector de Categoría
+    participant F as Formulario Dinámico (React Hook Form)
+    participant Z as Esquema Zod (Validation)
+    participant ST as Estado Local (InitialAssets)
 
-    Admin->>VistaActivos: Click en "Nuevo Activo"
-    VistaActivos->>Selector: Mostrar opciones (PC, Monitor, UPS)
-    Admin->>Selector: Selecciona un tipo (Ej: UPS)
-    Selector->>Formulario: Renderizar campos para UPS
-    Admin->>Formulario: Completa datos técnicos
-    Admin->>Formulario: Click en "Registrar Activo"
-    Formulario->>Formulario: Validar esquema (Zod)
-    Formulario->>Estado: Agregar activo a la lista
-    Estado-->>VistaActivos: Refrescar Tabla de Activos
-    VistaActivos-->>Admin: Mostrar Notificación de Éxito
+    T->>P: Clic en "Nuevo Activo"
+    P->>D: Abrir Modal de Registro
+    D->>S: Mostrar Opciones (PC, Monitor, UPS)
+    T->>S: Selecciona "Equipo de cómputo"
+    S->>F: Renderizar campos técnicos (CPU, RAM, OS, etc.)
+    T->>F: Completa especificaciones y responsable
+    T->>F: Clic en "Registrar Activo"
+    F->>Z: Validar integridad de datos
+    alt Datos Incompletos/Erróneos
+        Z-->>F: Retornar errores de esquema
+        F-->>T: Resaltar campos obligatorios en rojo
+    else Datos Válidos
+        F->>ST: push({id, ...data, status: 'Asignado'})
+        ST-->>P: Actualizar tabla (re-render)
+        P-->>T: Mostrar Toast ("Activo registrado con éxito")
+        D->>D: Cerrar Modal
+    end
 ```
 
 ---
 
-## 3. Diagrama de Secuencia: Gestión de Historial (Hoja de Vida)
-
-Ilustra cómo se registra un evento de mantenimiento o incidente en la hoja de vida de un activo existente.
+## 3. Diagrama de Secuencia: Gestión de Hoja de Vida e Historial
+Muestra cómo se mantiene la trazabilidad de un equipo a través de eventos de mantenimiento preventivo o correctivo.
 
 ```mermaid
 sequenceDiagram
-    participant Admin as Administrador / Técnico
-    participant Detalle as Diálogo de Detalles
-    participant HistorialForm as Formulario de Historial
-    participant MockData as Mock History DB
+    autonumber
+    participant A as Administrador
+    participant DT as Detalle de Activo (View)
+    participant H as Componente AssetHistory
+    participant HF as Formulario de Historial
+    participant DB as Mock History DB
 
-    Admin->>Detalle: Click en "Ver Equipo" (Ojo)
-    Detalle->>MockData: Consultar historial por ID
-    MockData-->>Detalle: Retornar lista de eventos
-    Admin->>Detalle: Click en "Añadir Historial"
-    Detalle->>HistorialForm: Mostrar formulario de registro
-    Admin->>HistorialForm: Ingresa Técnico, Tipo y Descripción
-    Admin->>HistorialForm: Click en "Guardar Registro"
-    HistorialForm->>MockData: Insertar nuevo evento
-    MockData-->>Detalle: Historial actualizado
-    Detalle-->>Admin: Mostrar nueva entrada en la lista
+    A->>DT: Clic en icono "Ojo" (Visualizar)
+    DT->>DB: Consultar Historial por AssetID
+    DB-->>H: Retornar Array de Eventos
+    H-->>DT: Renderizar Timeline de eventos
+    A->>DT: Clic en "Añadir Historial"
+    DT->>HF: Abrir Formulario (Técnico, Tipo, Desc)
+    A->>HF: Registra Mantenimiento Preventivo
+    A->>HF: Clic en "Guardar Registro"
+    HF->>DB: Actualizar registro (id_historial, fecha, desc)
+    DB-->>H: Notificar cambio
+    H-->>DT: Refrescar Timeline visualmente
+    DT-->>A: Mostrar Toast ("Registro guardado")
 ```
 
 ---
 
-## 4. Diagrama de Arquitectura de Datos (Simplificado)
-
-Relación entre las entidades principales del sistema.
+## 4. Modelo Entidad-Relación Detallado (ERD)
+Arquitectura de datos que soporta la integridad referencial y el seguimiento de activos.
 
 ```mermaid
 erDiagram
-    EMPRESA ||--o{ USUARIO : "pertenece"
-    EMPRESA ||--o{ ACTIVO : "posee"
+    COMPANIA ||--o{ USUARIO : "emplea"
+    COMPANIA ||--o{ ACTIVO : "es propietaria de"
     USUARIO ||--o{ ACTIVO : "es responsable de"
-    ACTIVO ||--o{ HISTORIAL : "tiene"
-    USUARIO ||--o{ HISTORIAL : "registra (técnico)"
+    ACTIVO ||--o{ HISTORIAL : "registra eventos en"
+    USUARIO ||--o{ HISTORIAL : "realiza (Técnico)"
 
-    EMPRESA {
-        string id_empresa
-        string nombre
+    COMPANIA {
+        string id_empresa PK
+        string nombre_social
         string ciudad
+        string nit
     }
 
     USUARIO {
-        string id_number
-        string nombre
-        string rol
+        string id_number PK
         string email
+        string nombre_completo
+        string rol "admin | tecnico | estandar"
+        string departamento
+        string ubicacion_fisica
     }
 
     ACTIVO {
-        string serial
-        string nombre
-        string categoria
+        string id_activo PK "LAP-001, UPS-05..."
+        string serial_number UK
+        string nombre_equipo
+        string categoria "PC | Monitor | UPS"
         date fecha_compra
+        string factura_nro
+        string marca
+        string modelo
+        string estado "Asignado | En Almacen | Baja"
+        string especificaciones_json "CPU, RAM, OS, etc."
     }
 
     HISTORIAL {
-        date fecha
-        string tipo
-        string descripcion
-        string autor
+        string id_evento PK
+        string id_activo FK
+        date fecha_evento
+        string tipo_evento "Mantenimiento | Incidente | Baja"
+        string descripcion_tecnica
+        string tecnico_nombre FK
     }
 ```
