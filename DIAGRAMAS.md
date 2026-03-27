@@ -21,13 +21,13 @@ sequenceDiagram
     U->>L: Ingresa ID y Contraseña
     L->>V: Validar formato de entrada
     V-->>L: Formato Válido
-    L->>M: Consultar credenciales
+    L->>M: Consultar credenciales (username matching)
     alt Credenciales Correctas
-        M-->>L: Retorna Usuario {rol, id, name}
-        L->>S: Guardar 'isAuthenticated', 'userRole', 'userName'
+        M-->>L: Retorna Usuario {rol, id, name, email}
+        L->>S: Guardar 'isAuthenticated', 'userRole', 'userName', 'userIdNumber'
         L-->>U: Mostrar Toast Éxito ("Bienvenido")
-        L->>R: Redirigir según Rol
-        R-->>U: Carga Dashboard (Admin/Tec) o Activos (Estandar)
+        L->>R: Redirigir según Rol (Dashboard o Activos)
+        R-->>U: Carga Vista Principal
     else Credenciales Incorrectas
         M-->>L: Usuario no encontrado / Clave errónea
         L-->>U: Mostrar Toast Error ("Credenciales Inválidas")
@@ -35,49 +35,50 @@ sequenceDiagram
 
     Note over U, R: HU-002: Recuperación de Contraseña
     U->>L: Clic en "¿Olvidaste tu contraseña?"
-    L->>U: Abrir Diálogo de Recuperación
+    L->>U: Abrir Diálogo de Recuperación (Dialog)
     U->>L: Ingresa Correo Electrónico
-    L->>M: Verificar existencia de correo
-    M-->>L: Confirmación de envío
+    L->>M: Verificar existencia de correo en DB
+    M-->>L: Confirmación de envío simulado
     L-->>U: Toast: "Enlace enviado a su correo"
 ```
 
 ---
 
 ## 2. Inteligencia de Negocio en Dashboard (HU-003, HU-004)
-Detalla la reactividad del sistema ante filtros y el cálculo dinámico de alertas de mantenimiento.
+Detalla la reactividad del sistema ante filtros y el cálculo dinámico de alertas de mantenimiento preventivo.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant T as Admin / Técnico
     participant D as Dashboard Page
-    participant S as Selector de Empresa
+    participant S as Selector de Empresa (Select)
     participant LM as Lógica Mantenimiento (date-fns)
     participant C as Componente Gráfico (Recharts)
 
     T->>D: Accede al Dashboard
-    D->>LM: Calcular estados de activos
-    LM-->>D: Retorna lista de alertas (HU-004)
-    D-->>T: Resalta en ROJO (Vencidos) y AMARILLO (Próximos)
+    D->>LM: fetch(assets) -> calcular estados
+    Note right of LM: HU-004: Alertas de Mantenimiento
+    LM-->>D: Retorna lista {isOverdue: boolean, daysUntil: number}
+    D-->>T: Renderiza Lista (Rojo: Vencidos / Amarillo: Próximos)
     
-    Note over T, C: HU-003: Filtrado Reactivo
+    Note over T, C: HU-003: Filtrado Reactivo por Empresa
     T->>S: Selecciona Empresa "HYCO"
-    S->>D: Disparar evento de cambio de estado
+    S->>D: Disparar evento onValueChange
     D->>D: useMemo(recalcular activos filtrados)
-    D->>C: Actualizar datos de gráfico
-    D-->>T: Actualiza tarjetas y listas en tiempo real
+    D->>C: Actualizar data del BarChart (Activos por Depto)
+    D-->>T: Actualiza Tarjetas de Resumen y Listas
 ```
 
 ---
 
 ## 3. Gestión de Entidades: Empresas y Usuarios (HU-005 a HU-010)
-Ciclo de vida de empresas y gestión de personal.
+Ciclo de vida de empresas y gestión de personal con validación de esquemas.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant A as Administrador
+    participant A as Administrador / Técnico
     participant P as Página Gestión (Empresas/Users)
     participant B as Barra de Búsqueda
     participant F as Formulario (Register/Company)
@@ -85,32 +86,36 @@ sequenceDiagram
 
     Note over A, DB: HU-005: Búsqueda Rápida
     A->>B: Escribe caracteres de búsqueda
-    B->>P: Actualizar 'searchTerm'
-    P->>P: filter(items => items.match(term))
-    P-->>A: Renderiza tabla filtrada dinámicamente
+    B->>P: Actualizar estado 'searchTerm'
+    P->>P: useMemo(filter items match term)
+    P-->>A: Renderiza tabla filtrada instantáneamente
 
     Note over A, DB: HU-006 a HU-010: CRUD de Entidades
     A->>P: Clic en "Nuevo" o "Editar"
-    P->>F: Abrir Modal con Formulario
-    A->>F: Completa/Modifica datos
-    F->>F: Validar con Zod Schema
-    A->>F: Clic en "Guardar"
-    F->>DB: Update/Create record
-    DB-->>P: Notificar actualización
-    P-->>A: Cerrar Modal y mostrar Toast de éxito
+    P->>F: Abrir Modal con Formulario (Zod Resolver)
+    A->>F: Completa/Modifica datos (ID, Nombre, Rol, etc.)
+    F->>F: Validar con Schema (z.object)
+    alt Datos Válidos
+        A->>F: Clic en "Guardar / Registrar"
+        F->>DB: Update/Create record en MockData
+        DB-->>P: Notificar éxito
+        P-->>A: Cerrar Modal y mostrar Toast de éxito
+    else Datos Inválidos
+        F-->>A: Resaltar campos con error (FormMessage)
+    end
 ```
 
 ---
 
 ## 4. Gestión Integral de Activos (HU-011 a HU-017)
-Detalla el proceso técnico, trazabilidad y control de inventario de equipos.
+Detalla el proceso técnico, trazabilidad y control de inventario de equipos tecnológicos.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant T as Técnico / Admin
     participant LA as Listado de Activos
-    participant FD as Formulario Dinámico
+    participant FD as Formulario Dinámico (AssetForm)
     participant VD as Vista Detalle (Hoja de Vida)
     participant PH as Proceso Historial
     participant PDF as Generador PDF
@@ -119,27 +124,24 @@ sequenceDiagram
     Note over T, FD: HU-011: Registro Técnico
     T->>LA: Clic en "Nuevo Activo"
     LA->>FD: Seleccionar Categoría (PC, UPS, Monitor)
-    FD->>FD: Renderizar campos técnicos específicos
-    T->>FD: Registra specs y responsable
-    FD->>LA: push(newAsset)
-    LA-->>T: Toast: "Activo registrado"
+    FD->>FD: Renderizar campos dinámicos (OS, RAM, Serial)
+    T->>FD: Registra specs y asigna responsable
+    FD->>LA: push(newAsset) + Toast Éxito
 
-    Note over T, VD: HU-012, HU-013, HU-014: Gestión de Hoja de Vida
-    T->>LA: Clic en icono "Ojo"
-    LA->>VD: Cargar specs e historial
-    T->>VD: Clic en "Añadir Historial"
+    Note over T, VD: HU-012 a HU-015: Gestión de Hoja de Vida
+    T->>LA: Clic en icono "Ojo" (Detalle)
+    LA->>VD: Cargar Specs + Timeline Historial
+    T->>VD: Clic en "Añadir Historial" (HU-013)
     VD->>PH: Abrir modal de intervención
-    T->>PH: Describe mantenimiento/incidente
-    PH-->>VD: Actualiza línea de tiempo (Timeline)
-    T->>VD: Clic en "Cambiar Responsable"
-    VD-->>LA: Actualizar campo 'responsable'
+    T->>PH: Selecciona (Mantenimiento/Incidente) + Descripción
+    PH-->>VD: Inserta en Timeline cronológico
+    T->>VD: Clic en "Descargar PDF" (HU-015)
+    VD->>PDF: Exportar Hoja de Vida Completa
+    PDF-->>T: Descarga archivo .pdf (Specs + Historial)
 
-    Note over T, PA: HU-015, HU-016, HU-017: Reportes y Ciclo Final
-    T->>VD: Clic en "Descargar PDF"
-    VD->>PDF: Exportar specs + historial
-    PDF-->>T: Descarga archivo .pdf
-    T->>LA: Clic en Papelera (HU-016)
-    LA->>LA: Mover a 'deletedAssets' con motivo
+    Note over T, PA: HU-016, HU-017: Baja y Restauración
+    T->>LA: Clic en Papelera (Eliminar)
+    LA->>LA: Mover a 'deletedAssets' con motivo de baja
     T->>PA: Clic en "Restaurar" (HU-017)
     PA-->>LA: Devolver activo a inventario operativo
 ```
@@ -147,7 +149,7 @@ sequenceDiagram
 ---
 
 ## 5. Visualización Restringida: Rol Estándar (HU-018, HU-019)
-Muestra cómo el sistema filtra la información para garantizar la privacidad y seguridad.
+Muestra cómo el sistema aplica la lógica de seguridad y privacidad para el usuario final.
 
 ```mermaid
 sequenceDiagram
@@ -158,12 +160,12 @@ sequenceDiagram
     participant VD as Vista Detalle (Solo Lectura)
 
     U->>P: Accede a la sección
-    P->>S: Obtener 'userIdNumber' de la sesión
-    P->>P: filter(assets => asset.responsableId == currentUserId)
-    Note right of P: HU-018: Solo muestra sus equipos
-    P-->>U: Renderiza tabla filtrada
+    P->>S: Obtener 'userIdNumber' y 'userName'
+    P->>P: filter(assets => asset.responsable == userName)
+    Note right of P: HU-018: Filtrado forzado de privacidad
+    P-->>U: Renderiza tabla con equipos asignados únicamente
     U->>P: Clic en icono "Ojo" (HU-019)
-    P->>VD: Abrir modal
+    P->>VD: Abrir modal de detalles
     Note right of VD: Inhabilita botones de Editar, Borrar e Historial
     VD-->>U: Muestra información técnica protegida
 ```
