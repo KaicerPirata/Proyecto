@@ -1,171 +1,169 @@
 # Diagramas Técnicos de Análisis - Activos Pro (Proyecto de Grado)
 
-Este documento contiene la representación técnica de los procesos fundamentales del sistema "Activos Pro", vinculados directamente a las Historias de Usuario (HU) definidas en el análisis de requerimientos.
+Este documento contiene la representación técnica avanzada de la arquitectura de software y los procesos del sistema, vinculados a las Historias de Usuario (HU).
 
 ---
 
-## 1. Proceso de Autenticación y Recuperación (HU-001, HU-002)
-Este diagrama detalla el acceso seguro al sistema y la lógica de protección de rutas basada en roles.
+## 1. Diagrama de Clases (Estructura de Datos)
+Este diagrama representa el modelo de datos robusto, definiendo atributos, tipos y relaciones de integridad referencial.
+
+```mermaid
+classDiagram
+    class Empresa {
+        +Int id [PK]
+        +String companyId [Unique]
+        +String name
+        +String city
+        +Enum status [Active, Inactive]
+    }
+
+    class Usuario {
+        +Int id [PK]
+        +String idNumber [Unique]
+        +String firstName
+        +String middleName
+        +String lastName
+        +String secondLastName
+        +String email [Unique]
+        +String password
+        +Enum role [Admin, Tecnico, Estandar]
+        +Enum status [Active, Inactive]
+        +String companyName [FK]
+        +String department
+        +String city
+        +String location
+    }
+
+    class Activo {
+        +String id [PK]
+        +String assetName
+        +Enum category [Computador, Monitor, UPS]
+        +Enum status [Asignado, En Almacen, Eliminado]
+        +String companyName [FK]
+        +String responsableName [FK]
+        +String serialNumber [Unique]
+        +Date purchaseDate
+        +String invoiceNumber
+        +String brand
+        +String model
+        +String city
+        +String processor
+        +String ram
+        +String storage
+        +String os
+        +String osKey
+        +String officeVersion
+        +String officeKey
+        +String description
+    }
+
+    class HistorialActivo {
+        +Int id [PK]
+        +String assetId [FK]
+        +Date date
+        +String author [FK]
+        +Enum type [Mantenimiento, Incidente, Instalacion, Asignacion]
+        +String description
+    }
+
+    Empresa "1" -- "0..*" Usuario : gestiona
+    Empresa "1" -- "0..*" Activo : posee
+    Usuario "1" -- "0..*" Activo : es responsable de
+    Activo "1" -- "0..*" HistorialActivo : registra cambios
+    Usuario "1" -- "0..*" HistorialActivo : realiza intervenciones
+```
+
+---
+
+## 2. Proceso de Autenticación y Seguridad (HU-001, HU-002)
+Detalla el flujo desde la interfaz hasta la validación de roles y persistencia de sesión.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant U as Usuario (Todos)
-    participant L as Interfaz Login (React)
-    participant V as Validador Zod (RegisterSchema)
-    participant M as Mock DB (users.ts)
+    participant U as Usuario
+    participant L as Login UI (Next.js)
+    participant V as Zod Validator
+    participant DB as Mock DB (Auth)
     participant S as LocalStorage (Session)
     participant R as Router (Next.js)
 
-    Note over U, R: HU-001: Iniciar Sesión
+    Note over U, R: HU-001: Inicio de Sesión
     U->>L: Ingresa ID y Contraseña
-    L->>V: Validar formato de entrada
-    V-->>L: Formato Válido
-    L->>M: Consultar credenciales (username matching)
-    alt Credenciales Correctas
-        M-->>L: Retorna Usuario {rol, id, name, email}
-        L->>S: Guardar 'isAuthenticated', 'userRole', 'userName', 'userIdNumber'
-        L-->>U: Mostrar Toast Éxito ("Bienvenido")
-        L->>R: Redirigir según Rol (Dashboard o Activos)
-        R-->>U: Carga Vista Principal
-    else Credenciales Incorrectas
-        M-->>L: Usuario no encontrado / Clave errónea
-        L-->>U: Mostrar Toast Error ("Credenciales Inválidas")
-    end
-
-    Note over U, R: HU-002: Recuperación de Contraseña
-    U->>L: Clic en "¿Olvidaste tu contraseña?"
-    L->>U: Abrir Diálogo de Recuperación (Dialog)
-    U->>L: Ingresa Correo Electrónico
-    L->>M: Verificar existencia de correo en DB
-    M-->>L: Confirmación de envío simulado
-    L-->>U: Toast: "Enlace enviado a su correo"
-```
-
----
-
-## 2. Inteligencia de Negocio en Dashboard (HU-003, HU-004)
-Detalla la reactividad del sistema ante filtros y el cálculo dinámico de alertas de mantenimiento preventivo.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant T as Admin / Técnico
-    participant D as Dashboard Page
-    participant S as Selector de Empresa (Select)
-    participant LM as Lógica Mantenimiento (date-fns)
-    participant C as Componente Gráfico (Recharts)
-
-    T->>D: Accede al Dashboard
-    D->>LM: fetch(assets) -> calcular estados
-    Note right of LM: HU-004: Alertas de Mantenimiento
-    LM-->>D: Retorna lista {isOverdue: boolean, daysUntil: number}
-    D-->>T: Renderiza Lista (Rojo: Vencidos / Amarillo: Próximos)
-    
-    Note over T, C: HU-003: Filtrado Reactivo por Empresa
-    T->>S: Selecciona Empresa "HYCO"
-    S->>D: Disparar evento onValueChange
-    D->>D: useMemo(recalcular activos filtrados)
-    D->>C: Actualizar data del BarChart (Activos por Depto)
-    D-->>T: Actualiza Tarjetas de Resumen y Listas
-```
-
----
-
-## 3. Gestión de Entidades: Empresas y Usuarios (HU-005 a HU-010)
-Ciclo de vida de empresas y gestión de personal con validación de esquemas.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant A as Administrador / Técnico
-    participant P as Página Gestión (Empresas/Users)
-    participant B as Barra de Búsqueda
-    participant F as Formulario (Register/Company)
-    participant DB as Mock DB Store
-
-    Note over A, DB: HU-005: Búsqueda Rápida
-    A->>B: Escribe caracteres de búsqueda
-    B->>P: Actualizar estado 'searchTerm'
-    P->>P: useMemo(filter items match term)
-    P-->>A: Renderiza tabla filtrada instantáneamente
-
-    Note over A, DB: HU-006 a HU-010: CRUD de Entidades
-    A->>P: Clic en "Nuevo" o "Editar"
-    P->>F: Abrir Modal con Formulario (Zod Resolver)
-    A->>F: Completa/Modifica datos (ID, Nombre, Rol, etc.)
-    F->>F: Validar con Schema (z.object)
-    alt Datos Válidos
-        A->>F: Clic en "Guardar / Registrar"
-        F->>DB: Update/Create record en MockData
-        DB-->>P: Notificar éxito
-        P-->>A: Cerrar Modal y mostrar Toast de éxito
-    else Datos Inválidos
-        F-->>A: Resaltar campos con error (FormMessage)
+    L->>V: Validar formato (registerSchema)
+    alt Formato Inválido
+        V-->>L: Retorna errores de campo
+        L-->>U: Resalta campos (Toast Error)
+    else Formato Válido
+        L->>DB: Consultar credenciales
+        alt Credenciales Correctas
+            DB-->>L: Retorna User {role, name, idNumber}
+            L->>S: Guardar Token y Perfil (setItem)
+            L-->>U: Toast: "Bienvenido [Nombre]"
+            L->>R: Redirigir según Rol
+            Note right of R: Admin/Tecnico -> /dashboard<br/>Estandar -> /assets
+        else Credenciales Incorrectas
+            DB-->>L: Error 401 (Unauthorized)
+            L-->>U: Toast: "Usuario o clave incorrectos"
+        end
     end
 ```
 
 ---
 
-## 4. Gestión Integral de Activos (HU-011 a HU-017)
-Detalla el proceso técnico, trazabilidad y control de inventario de equipos tecnológicos.
+## 3. Gestión Integral de Activos y Trazabilidad (HU-011 a HU-017)
+Ciclo de vida técnico de un equipo, incluyendo mantenimiento y bajas lógicas.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant T as Técnico / Admin
-    participant LA as Listado de Activos
-    participant FD as Formulario Dinámico (AssetForm)
+    participant LA as Pantalla Activos
+    participant AF as Formulario Activo (Zod)
     participant VD as Vista Detalle (Hoja de Vida)
     participant PH as Proceso Historial
-    participant PDF as Generador PDF
-    participant PA as Papelera (Activos Eliminados)
+    participant DB as Mock Data Store
 
-    Note over T, FD: HU-011: Registro Técnico
-    T->>LA: Clic en "Nuevo Activo"
-    LA->>FD: Seleccionar Categoría (PC, UPS, Monitor)
-    FD->>FD: Renderizar campos dinámicos (OS, RAM, Serial)
-    T->>FD: Registra specs y asigna responsable
-    FD->>LA: push(newAsset) + Toast Éxito
+    Note over T, DB: HU-011: Registro de Activo
+    T->>LA: Clic "Nuevo Activo"
+    LA->>AF: Seleccionar Categoría
+    Note right of AF: Carga campos específicos<br/>(RAM, OS para PC / VA para UPS)
+    T->>AF: Completa Specs + Serial
+    AF->>DB: Push nuevo registro
+    DB-->>LA: Actualiza Tabla + Toast Éxito
 
-    Note over T, VD: HU-012 a HU-015: Gestión de Hoja de Vida
-    T->>LA: Clic en icono "Ojo" (Detalle)
-    LA->>VD: Cargar Specs + Timeline Historial
-    T->>VD: Clic en "Añadir Historial" (HU-013)
-    VD->>PH: Abrir modal de intervención
-    T->>PH: Selecciona (Mantenimiento/Incidente) + Descripción
-    PH-->>VD: Inserta en Timeline cronológico
-    T->>VD: Clic en "Descargar PDF" (HU-015)
-    VD->>PDF: Exportar Hoja de Vida Completa
-    PDF-->>T: Descarga archivo .pdf (Specs + Historial)
-
-    Note over T, PA: HU-016, HU-017: Baja y Restauración
-    T->>LA: Clic en Papelera (Eliminar)
-    LA->>LA: Mover a 'deletedAssets' con motivo de baja
-    T->>PA: Clic en "Restaurar" (HU-017)
-    PA-->>LA: Devolver activo a inventario operativo
+    Note over T, DB: HU-012, HU-013: Gestión de Mantenimiento
+    T->>LA: Clic icono "Ojo" (Detalle)
+    LA->>VD: Cargar Specs + Timeline
+    T->>VD: Clic "Añadir Historial"
+    VD->>PH: Abrir Modal Intervención
+    T->>PH: Selecciona Tipo (Mantenimiento) + Descrip.
+    PH->>DB: Update assetHistory[assetId]
+    DB-->>VD: Renderiza nueva entrada en Timeline
+    T-->>T: Clic "Descargar PDF" (HU-015)
 ```
 
 ---
 
-## 5. Visualización Restringida: Rol Estándar (HU-018, HU-019)
-Muestra cómo el sistema aplica la lógica de seguridad y privacidad para el usuario final.
+## 4. Lógica de Privacidad: Rol Estándar (HU-018, HU-019)
+Muestra cómo el sistema restringe datos basándose en la identidad del usuario logueado.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant U as Usuario Estándar
     participant S as LocalStorage
-    participant P as Página Activos
-    participant VD as Vista Detalle (Solo Lectura)
+    participant P as Página /assets
+    participant DB as Data Store
 
-    U->>P: Accede a la sección
-    P->>S: Obtener 'userIdNumber' y 'userName'
-    P->>P: filter(assets => asset.responsable == userName)
-    Note right of P: HU-018: Filtrado forzado de privacidad
-    P-->>U: Renderiza tabla con equipos asignados únicamente
-    U->>P: Clic en icono "Ojo" (HU-019)
-    P->>VD: Abrir modal de detalles
-    Note right of VD: Inhabilita botones de Editar, Borrar e Historial
-    VD-->>U: Muestra información técnica protegida
+    U->>P: Accede a la ruta
+    P->>S: getItem('userIdNumber')
+    P->>DB: fetch(allAssets)
+    Note right of P: HU-018: Filtrado en Cliente
+    P->>P: assets.filter(a => a.responsable == userName)
+    P-->>U: Renderiza Tabla (Solo mis equipos)
+    
+    U->>P: Clic en Detalle (HU-019)
+    P->>P: Disable Edit/Delete Buttons
+    P-->>U: Muestra Hoja de Vida (Solo Lectura)
 ```
