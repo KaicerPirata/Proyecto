@@ -107,6 +107,14 @@ sequenceDiagram
             L-->>U: Toast: "Usuario o clave incorrectos"
         end
     end
+
+    Note over U, R: HU-002: Recuperación
+    U->>L: Clic "¿Olvidaste contraseña?"
+    L->>L: Abrir DialogRecuperacion
+    U->>L: Ingresa Correo
+    L->>DB: Validar existencia correo
+    DB-->>L: Confirmación envío
+    L-->>U: Toast: "Enlace enviado al correo"
 ```
 
 ---
@@ -140,7 +148,18 @@ sequenceDiagram
     T->>PH: Selecciona Tipo (Mantenimiento) + Descrip.
     PH->>DB: Update assetHistory[assetId]
     DB-->>VD: Renderiza nueva entrada en Timeline
-    T-->>T: Clic "Descargar PDF" (HU-015)
+
+    Note over T, DB: HU-016, HU-017: Baja y Restauración
+    T->>LA: Clic Papelera (HU-016)
+    LA->>LA: Abrir AlertDialog
+    T->>LA: Ingresa Motivo (Dañado) + Confirmar
+    LA->>DB: Mover a deletedAssets[]
+    DB-->>LA: Quitar de tabla activa
+    
+    T->>LA: Pestaña "Eliminados" (HU-017)
+    T->>LA: Clic "Restaurar"
+    LA->>DB: Mover a assets[]
+    DB-->>LA: Regresa a tabla principal
 ```
 
 ---
