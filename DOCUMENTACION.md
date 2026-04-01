@@ -10,7 +10,15 @@ Este documento proporciona una explicación detallada sobre la arquitectura y el
 - **Estilos CSS:** [Tailwind CSS](https://tailwindcss.com/).
 - **Gestión de Formularios:** [React Hook Form](https://react-hook-form.com/) con [Zod](https://zod.dev/) para validación de esquemas.
 - **Visualización de Datos:** [Recharts](https://recharts.org/) para gráficos.
-- **Fuente de Datos:** Actualmente, todos los datos son simulados (mock data) y se encuentran centralizados en `src/lib/mock-data.ts`. Esto permite un desarrollo rápido y facilita la futura integración con una base de datos real.
+- **Fuente de Datos (Mock DB):** Explicado en la sección 1.1.
+
+### 1.1 El Concepto de Mock DB (Base de Datos Simulada)
+Para las fases iniciales y de prueba de este proyecto de grado, se utiliza una **Mock DB**. Esto significa que los datos de empresas, usuarios y activos no residen en un servidor externo, sino que están centralizados en el archivo `src/lib/mock-data.ts`.
+
+**Ventajas para el Proyecto de Grado:**
+1. **Velocidad de Demostración:** No hay latencia de red, la aplicación responde instantáneamente durante la sustentación.
+2. **Independencia de Conexión:** El sistema funciona perfectamente sin internet.
+3. **Seguridad del Prototipo:** Permite probar flujos de usuario (como el cambio de roles) sin riesgo de corromper una base de datos de producción.
 
 ---
 
@@ -83,30 +91,22 @@ Estos tres módulos (Empresas, Usuarios y Activos) comparten una estructura y l�
   - `src/app/assets/page.tsx`
 
 **¿Qué hacen?**
-Permiten realizar las operaciones básicas de **C**rear, **L**eer, **A**ctualizar y **E**liminar (CRUD, por sus siglas en inglés) registros. Cada página muestra los datos en una tabla, con opciones para buscar, filtrar y realizar acciones.
+Permiten realizar las operaciones básicas de **C**rear, **L**eer, **A**ctualizar y **E**liminar (CRUD) registros sobre la **Mock DB**.
 
 **¿Cómo funcionan (patrón común)?**
 1.  **Listado y Estado:**
     - Los datos se cargan desde `src/lib/mock-data.ts` y se guardan en un estado local con `useState`.
-    - Se usa `useMemo` para recalcular la lista filtrada (`filteredCompanies`, `filteredUsers`, `filteredAssets`) cada vez que el término de búsqueda (`searchTerm`) o los filtros avanzados (`advancedFilters`) cambian. Esto es muy eficiente.
+    - Se usa `useMemo` para recalcular la lista filtrada cada vez que el término de búsqueda (`searchTerm`) o los filtros avanzados cambian.
 2.  **Tabla de Datos:**
-    - Se utiliza el componente `<Table>` de ShadCN para mostrar los datos.
-    - Se itera sobre la lista filtrada (`filtered...map(...)`) para renderizar cada fila (`<TableRow>`).
+    - Se utiliza el componente `<Table>` de ShadCN para mostrar los datos de forma elegante.
 3.  **Búsqueda y Filtros:**
-    - Un `<Input>` actualiza el estado `searchTerm`.
-    - Un `<Accordion>` contiene los filtros avanzados, que son componentes `<Select>` que actualizan el estado `advancedFilters`. La lógica de filtrado se aplica en el `useMemo`.
+    - Un `<Input>` actualiza el estado de búsqueda en tiempo real.
 4.  **Creación y Edición (Formularios en Diálogo):**
-    - La creación y edición se manejan a través de un componente `<Dialog>` que contiene un formulario.
-    - **Estado del Diálogo:** Se usan estados booleanos como `isCreateDialogOpen` y `isEditDialogOpen` para controlar la visibilidad de los diálogos.
-    - **Formulario:** El componente del formulario (ej. `CompanyForm`, `RegisterForm`, `AssetForm`) utiliza `react-hook-form`.
-    - **Validación:** El esquema de `zod` (ej. `companySchema`) se conecta al formulario mediante `zodResolver` para validar los campos automáticamente.
-    - **Envío (`onSubmit`):** La función `onSubmit` dentro del formulario simula el guardado de datos y muestra una notificación (`toast`) de éxito o error. Llama a la función `onSaveSuccess` pasada como prop para cerrar el diálogo.
+    - La creación y edición se manejan a través de un componente `<Dialog>` que contiene un formulario validado por **Zod**.
 5.  **Eliminación:**
-    - La acción de eliminar se encuentra dentro de un `<AlertDialog>` para pedir confirmación al usuario antes de proceder.
-    - Al confirmar, se actualiza el estado local filtrando el elemento eliminado.
+    - Se utiliza un `<AlertDialog>` para confirmar antes de borrar datos de la Mock DB.
 
 **Particularidades del Módulo de Activos:**
 - Es el más complejo, ya que maneja múltiples tipos de activos.
-- En el diálogo de creación, primero muestra un selector de tipo de activo (`AssetTypeSelector`).
-- Dependiendo del tipo seleccionado, renderiza condicionalmente el `AssetForm` con los campos correspondientes (ej. un formulario para "Equipo de cómputo" tiene más campos que uno para "Monitor").
 - La vista de detalles (`Asset Details Dialog`) muestra información completa del activo y su historial a través del componente `AssetHistory`.
+- Incluye la funcionalidad de **Baja Lógica**, moviendo activos a la papelera en lugar de borrarlos físicamente de inmediato.
