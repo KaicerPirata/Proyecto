@@ -1,112 +1,92 @@
 # Documentación Técnica del Sistema "Activos Pro"
 
-Este documento proporciona una explicación detallada sobre la arquitectura y el funcionamiento de cada módulo principal de la aplicación, describiendo qué hace y cómo está implementado.
+Este documento proporciona una explicación detallada sobre la arquitectura y el funcionamiento de cada módulo principal de la aplicación, describiendo qué hace y cómo está implementado. Es el pilar documental para la sustentación del proyecto de grado.
 
-## 1. Tecnologías y Estructura del Proyecto
+---
 
-- **Framework Principal:** [Next.js](https://nextjs.org/) (usando el App Router).
-- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/).
-- **Componentes de UI:** [ShadCN/UI](https://ui.shadcn.com/) sobre Radix UI.
-- **Estilos CSS:** [Tailwind CSS](https://tailwindcss.com/).
-- **Gestión de Formularios:** [React Hook Form](https://react-hook-form.com/) con [Zod](https://zod.dev/) para validación de esquemas.
-- **Visualización de Datos:** [Recharts](https://recharts.org/) para gráficos.
-- **Fuente de Datos (Mock DB):** Explicado en la sección 1.1.
+## 1. Arquitectura de la Aplicación (Detalle Técnico)
 
-### 1.1 El Concepto de Mock DB (Base de Datos Simulada)
-Para las fases iniciales y de prueba de este proyecto de grado, se utiliza una **Mock DB**. Esto significa que los datos de empresas, usuarios y activos no residen en un servidor externo, sino que están centralizados en el archivo `src/lib/mock-data.ts`.
+La aplicación sigue una arquitectura moderna basada en el **Frontend-First**, utilizando el framework **Next.js 15** con el **App Router**. Se ha diseñado bajo un modelo de capas lógicas para garantizar la escalabilidad y el mantenimiento.
 
-**Ventajas para el Proyecto de Grado:**
-1. **Velocidad de Demostración:** No hay latencia de red, la aplicación responde instantáneamente durante la sustentación.
+### 1.1 Capas del Sistema
+1.  **Capa de Presentación (UI):** Construida con **React** y componentes de **ShadCN UI**. Se utiliza **Tailwind CSS** para un diseño responsivo y profesional. La interfaz es atómica, lo que significa que cada botón, tabla y formulario es un componente independiente y reutilizable.
+2.  **Capa de Lógica de Negocio (Hooks y Estado):** Gestión de estados complejos mediante React Hooks (`useState`, `useMemo`, `useEffect`). Se implementó **Zod** como motor de validación para asegurar que ningún dato erróneo entre al sistema.
+3.  **Capa de Servicios y Persistencia:** Actualmente utiliza un **Mock DB** centralizado (`src/lib/mock-data.ts`) y **LocalStorage** para la persistencia de la sesión del usuario. Esta arquitectura permite una transición fluida hacia una base de datos real (como PostgreSQL o Firebase) simplemente cambiando la capa de servicios.
+
+### 1.2 Flujo de Datos
+- El usuario interactúa con la UI.
+- Los formularios validan los datos en tiempo real con esquemas de **Zod**.
+- Los cambios se reflejan instantáneamente en el estado global de la página.
+- Los datos se persisten localmente para permitir que la aplicación funcione sin conexión (Offline-first approach).
+
+---
+
+## 2. Modelo Relacional de Datos
+
+Aunque el sistema utiliza objetos de TypeScript para el prototipo, el diseño lógico sigue un **Modelo Relacional** estricto para garantizar la integridad referencial. A continuación se detallan las entidades y sus relaciones:
+
+### 2.1 Entidades Principales
+
+#### **A. Empresa (Master)**
+Representa a los clientes o entidades dueñas de los activos.
+- `id` (PK - Int): Identificador único interno.
+- `companyId` (Unique - String): Código legal o NIT de la empresa.
+- `name` (String): Razón social.
+- `city` (String): Ciudad de operación.
+- `status` (Enum): Estado de la empresa (Activa/Inactiva).
+
+#### **B. Usuario (Entidad)**
+Personas que acceden al sistema o son responsables de equipos.
+- `id` (PK - Int): Identificador interno.
+- `idNumber` (Unique - String - FK): Número de cédula/identificación.
+- `firstName`, `lastName` (String): Nombres y apellidos.
+- `email` (Unique - String): Correo de contacto.
+- `role` (Enum): Permisos (Admin, Tecnico, Estandar).
+- `companyName` (FK): Relación con la empresa a la que pertenece.
+
+#### **C. Activo (Entidad Central)**
+Cualquier equipo tecnológico registrado.
+- `id` (PK - String): ID único del activo (ej: LAP-001).
+- `assetName` (String): Nombre descriptivo.
+- `category` (Enum): Tipo (Computador, Monitor, UPS).
+- `responsableName` (FK): Relación con el Usuario que tiene el equipo a cargo.
+- `serialNumber` (Unique - String): Serial físico del fabricante.
+- `brand`, `model` (String): Marca y modelo.
+- `specs` (JSON/Fields): Procesador, RAM, Almacenamiento, etc.
+
+#### **D. HistorialActivo (Transaccional)**
+Bitácora de mantenimientos e incidentes.
+- `id` (PK - Int): Identificador del registro.
+- `assetId` (FK): Referencia al activo intervenido.
+- `date` (Date): Fecha del evento.
+- `author` (FK): Usuario (Técnico/Admin) que realizó la acción.
+- `type` (Enum): Categoría (Mantenimiento, Incidente, Instalación).
+- `description` (Text): Detalle técnico de la intervención.
+
+### 2.2 Relaciones de Cardinalidad
+- **Empresa (1) -> Usuarios (N):** Una empresa tiene muchos empleados, pero un empleado pertenece a una sola empresa.
+- **Usuario (1) -> Activos (N):** Un usuario puede ser responsable de varios equipos (laptop, monitor, celular).
+- **Activo (1) -> Historial (N):** Un equipo tiene una "hoja de vida" con múltiples registros de mantenimiento a lo largo del tiempo.
+
+---
+
+## 3. El Concepto de Mock DB (Base de Datos Simulada)
+Para las fases iniciales y de prueba de este proyecto de grado, se utiliza una **Mock DB**. Esto significa que los datos no residen en un servidor externo, sino que están centralizados en el archivo `src/lib/mock-data.ts`.
+
+**Ventajas para la Sustentación:**
+1. **Velocidad de Demostración:** No hay latencia de red, la aplicación responde instantáneamente.
 2. **Independencia de Conexión:** El sistema funciona perfectamente sin internet.
-3. **Seguridad del Prototipo:** Permite probar flujos de usuario (como el cambio de roles) sin riesgo de corromper una base de datos de producción.
+3. **Seguridad del Prototipo:** Permite probar flujos (como el cambio de roles) sin riesgo de corromper una base de datos real.
 
 ---
 
-## 2. Módulo de Autenticación (Login)
+## 4. Módulos de la Aplicación
 
-- **Archivo Clave:** `src/app/login/page.tsx`
+### 4.1 Autenticación
+Controla el acceso según el rol guardado en `localStorage`. Redirige automáticamente al usuario según sus permisos (HU-001).
 
-**¿Qué hace?**
-Este módulo presenta una pantalla de inicio de sesión donde el usuario introduce su ID y contraseña. Al autenticarse, el sistema guarda su información (rol, nombre, etc.) en el `localStorage` del navegador y lo redirige a la página principal.
+### 4.2 Gestión de Activos y Hoja de Vida
+Es el núcleo técnico. Permite ver las especificaciones de hardware (RAM, Procesador, SO) y el historial de intervenciones. Incluye la lógica de **Baja Lógica** para mover equipos a la papelera sin borrarlos definitivamente.
 
-**¿Cómo funciona?**
-1.  **Formulario:** La página renderiza un componente `<Card>` de ShadCN con dos `<Input>` para el usuario y la contraseña.
-2.  **Estado:** `useState` se utiliza para almacenar los valores del usuario y la contraseña a medida que se escriben.
-3.  **Lógica de Login (`handleLogin`):**
-    - Al enviar el formulario, se simula una llamada asíncrona con `setTimeout`.
-    - Busca el usuario en el objeto `users` (hardcodeado en el mismo archivo).
-    - Si las credenciales son correctas, guarda los datos del usuario en `localStorage` usando `localStorage.setItem('userRole', user.role)`.
-    - Redirige al usuario al dashboard (`/`) o a la página de activos si su rol es 'estandar' usando el `useRouter` de Next.js.
-    - Si falla, muestra una notificación de error (`toast`).
-4.  **Recuperar Contraseña:** Un `<Dialog>` se abre para que el usuario pueda solicitar un enlace de recuperación (actualmente solo simula el envío).
-
----
-
-## 3. Módulo de Layout y Navegación (DashboardLayout)
-
-- **Archivo Clave:** `src/components/dashboard-layout.tsx`
-
-**¿Qué hace?**
-Es la estructura principal que envuelve todas las páginas protegidas. Proporciona una barra de navegación lateral (Sidebar) consistente y un encabezado (Header). Controla qué elementos del menú son visibles según el rol del usuario.
-
-**¿Cómo funciona?**
-1.  **Estado y Contexto:** Utiliza el `SidebarProvider` para gestionar el estado de la barra lateral (abierta/cerrada).
-2.  **Obtención de Rol:** En `useEffect`, lee el rol y nombre del usuario desde `localStorage`.
-3.  **Renderizado Condicional:** Basado en el `userRole` obtenido, decide si renderizar los enlaces del menú para "Empresas" y "Usuarios". Por ejemplo: ` {canViewEmpresas && (<SidebarMenuItem>...)}`.
-4.  **Componentes Hijos:**
-    - **`<Sidebar>`:** La barra lateral izquierda, que contiene los enlaces de navegación (`SidebarMenuButton`).
-    - **`<Header>`:** El encabezado superior, que contiene el menú de perfil del usuario (cambiar clave, cerrar sesión).
-    - **`{children}`:** Renderiza el contenido específico de la página actual (ej. el Dashboard, la tabla de usuarios, etc.).
-
----
-
-## 4. Módulo de Inicio (Dashboard)
-
-- **Archivo Clave:** `src/app/dashboard/page.tsx`
-
-**¿Qué hace?**
-Es la página principal que ven los administradores y técnicos. Muestra un resumen visual del estado del sistema: tarjetas con totales, un gráfico de distribución de activos y una lista de mantenimientos próximos.
-
-**¿Cómo funciona?**
-1.  **Filtrado de Datos:** Usa un `Select` para filtrar los datos por empresa. El estado `selectedCompany` controla qué datos se muestran.
-2.  **Cálculos con `useMemo`:** Para optimizar el rendimiento, los activos y usuarios filtrados se calculan con `useMemo`. Esto evita recalcular los datos en cada renderizado si la empresa seleccionada no ha cambiado.
-3.  **Lógica de Mantenimiento (`useEffect`):**
-    - Calcula las fechas de los próximos mantenimientos para los equipos de cómputo y UPS.
-    - Se basa en la fecha del último mantenimiento registrado en `assetHistory` o en la fecha de compra si no hay historial.
-    - Ordena la lista para mostrar primero los mantenimientos más urgentes o vencidos.
-4.  **Componentes de UI:**
-    - **`SummaryCards`:** Muestra los totales de activos, usuarios y tareas.
-    - **`AssetsChart`:** Recibe los activos filtrados y los agrupa por departamento para renderizar un gráfico de barras con `Recharts`.
-    - **`UpcomingMaintenance`:** Muestra la lista de equipos que necesitan mantenimiento.
-
----
-
-## 5. Módulos de Gestión (CRUD - Empresas, Usuarios, Activos)
-
-Estos tres módulos (Empresas, Usuarios y Activos) comparten una estructura y lógica muy similar.
-
-- **Archivos Clave:**
-  - `src/app/empresas/page.tsx`
-  - `src/app/users/page.tsx`
-  - `src/app/assets/page.tsx`
-
-**¿Qué hacen?**
-Permiten realizar las operaciones básicas de **C**rear, **L**eer, **A**ctualizar y **E**liminar (CRUD) registros sobre la **Mock DB**.
-
-**¿Cómo funcionan (patrón común)?**
-1.  **Listado y Estado:**
-    - Los datos se cargan desde `src/lib/mock-data.ts` y se guardan en un estado local con `useState`.
-    - Se usa `useMemo` para recalcular la lista filtrada cada vez que el término de búsqueda (`searchTerm`) o los filtros avanzados cambian.
-2.  **Tabla de Datos:**
-    - Se utiliza el componente `<Table>` de ShadCN para mostrar los datos de forma elegante.
-3.  **Búsqueda y Filtros:**
-    - Un `<Input>` actualiza el estado de búsqueda en tiempo real.
-4.  **Creación y Edición (Formularios en Diálogo):**
-    - La creación y edición se manejan a través de un componente `<Dialog>` que contiene un formulario validado por **Zod**.
-5.  **Eliminación:**
-    - Se utiliza un `<AlertDialog>` para confirmar antes de borrar datos de la Mock DB.
-
-**Particularidades del Módulo de Activos:**
-- Es el más complejo, ya que maneja múltiples tipos de activos.
-- La vista de detalles (`Asset Details Dialog`) muestra información completa del activo y su historial a través del componente `AssetHistory`.
-- Incluye la funcionalidad de **Baja Lógica**, moviendo activos a la papelera en lugar de borrarlos físicamente de inmediato.
+### 4.3 Visualización de Indicadores (Dashboard)
+Usa **Recharts** para transformar los datos en gráficos de barras. Filtra automáticamente los resultados por empresa, permitiendo un análisis gerencial rápido.
