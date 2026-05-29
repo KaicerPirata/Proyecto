@@ -1,6 +1,19 @@
 
 import { addMonths, subDays } from 'date-fns';
 
+export const catalog = {
+  pcModels: ['Latitude 5420', 'ThinkPad T14', 'Elitebook 840 G8', 'Vostro 3400'],
+  ramSizes: ['2 GB', '4 GB', '8 GB', '16 GB', '32 GB', '64 GB'],
+  ramTypes: ['DDR1', 'DDR2', 'DDR3', 'DDR4', 'DDR5'],
+  diskSizes: ['250 GB', '480 GB', '512 GB', '1 TB', '2 TB'],
+  diskTypes: ['SSD', 'M.2 NVMe', 'HDD'],
+  processors: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7'],
+  processorGenerations: ['8va Gen', '9na Gen', '10ma Gen', '11va Gen', '12va Gen', '13va Gen', '14va Gen'],
+  upsBrands: ['APC', 'Tripp Lite', 'CyberPower', 'Forza'],
+  monitorBrands: ['Dell', 'LG', 'Samsung', 'HP', 'Acer', 'ViewSonic'],
+  pcBrands: ['Dell', 'HP', 'Lenovo', 'Asus', 'Apple']
+};
+
 export const assets = [
   {
     id: 'LAP-001',
@@ -15,9 +28,12 @@ export const assets = [
     invoiceNumber: 'FV-2023-1234',
     brand: 'Dell',
     model: 'Latitude 5420',
-    processor: 'Intel Core i7-11800H',
-    ram: '16 GB DDR4',
-    storage: '1 TB SSD NVMe',
+    processor: 'Intel Core i7',
+    processorGen: '11va Gen',
+    ram: '16 GB',
+    ramType: 'DDR4',
+    storage: '1 TB',
+    storageType: 'SSD',
     os: 'Windows 11 Pro',
     osKey: 'XXXXX-XXXXX-XXXXX-XXXXX-ABCDE',
     officeVersion: 'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021',
@@ -65,9 +81,12 @@ export const assets = [
     purchaseDate: '2023-08-20',
     brand: 'HP',
     model: 'Elitebook 840 G8',
-    processor: 'Intel Core i5-1135G7',
-    ram: '16 GB DDR4',
-    storage: '512 GB SSD',
+    processor: 'Intel Core i5',
+    processorGen: '11va Gen',
+    ram: '16 GB',
+    ramType: 'DDR4',
+    storage: '512 GB',
+    storageType: 'SSD',
     os: 'Windows 11 Pro',
   },
   {
@@ -82,9 +101,12 @@ export const assets = [
     purchaseDate: '2024-02-10',
     brand: 'Lenovo',
     model: 'ThinkPad T14',
-    processor: 'AMD Ryzen 5 PRO 5650U',
-    ram: '16 GB DDR4',
-    storage: '512 GB SSD',
+    processor: 'AMD Ryzen 5',
+    processorGen: '5ta Gen',
+    ram: '16 GB',
+    ramType: 'DDR4',
+    storage: '512 GB',
+    storageType: 'SSD',
     os: 'Windows 11 Pro',
   }
 ];
@@ -99,7 +121,6 @@ export const assetHistory = {
     ],
     'UPS-001': [
         { id: '4', date: '2024-07-20', author: 'Almacén', type: 'Asignación', description: 'Activo asignado a Carlos Fierro (Ventas).' },
-        // This maintenance is overdue to test the logic
         { id: '5', date: '2024-01-10', author: 'Dylam Moralez', type: 'Mantenimiento', description: 'Revisión de batería y limpieza.' },
     ],
     'LAP-002': [
@@ -139,5 +160,3 @@ export const companies = [
     { id: 3, companyId: 'EMP003', name: 'FUNDIMETAL', city: 'Cali' },
     { id: 4, companyId: 'EMP004', name: 'WFM', city: 'Cali' },
 ];
-
-    

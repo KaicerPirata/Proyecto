@@ -22,6 +22,7 @@ import {
   LogOut,
   Box,
   Building,
+  Settings2,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { usePathname } from 'next/navigation';
@@ -68,6 +69,7 @@ const DashboardLayout: FC<{ children: ReactNode }> = ({ children }) => {
   const canViewEmpresas = userRole === 'admin';
   const canViewUsers = userRole === 'admin' || userRole === 'tecnico';
   const canViewDashboard = userRole !== 'estandar';
+  const canViewCatalog = userRole === 'admin' || userRole === 'tecnico';
 
 
   return (
@@ -122,6 +124,16 @@ const DashboardLayout: FC<{ children: ReactNode }> = ({ children }) => {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {canViewCatalog && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive('/catalogo')} tooltip="Catálogo">
+                    <Link href="/catalogo">
+                      <Settings2 />
+                      <span>Catálogo Técnico</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>

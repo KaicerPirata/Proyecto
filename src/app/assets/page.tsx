@@ -60,7 +60,7 @@ import AssetHistory from '@/components/dashboard/asset-history';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, companies } from '@/lib/mock-data';
+import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, companies, catalog } from '@/lib/mock-data';
 
 
 const computerAssetSchema = z.object({
@@ -70,22 +70,27 @@ const computerAssetSchema = z.object({
   purchaseDate: z.date({ required_error: 'La fecha de compra es requerida.' }),
   assetName: z.string().min(1, 'El nombre del activo es requerido.'),
   networkName: z.string().optional(),
-  equipmentType: z.enum(['micro', 'portatil', 'servidor', 'sff', 'todo en uno', 'torre', 'ups']),
+  equipmentType: z.enum(['micro', 'portatil', 'servidor', 'sff', 'todo en uno', 'torre']),
   brand: z.string().min(1, 'La marca es requerida.'),
   model: z.string().min(1, 'El modelo es requerido.'),
   processor: z.string().min(1, 'El procesador es requerido.'),
+  processorGen: z.string().optional(),
   ram: z.string().min(1, 'La memoria RAM es requerida.'),
+  ramType: z.string().optional(),
   storage: z.string().min(1, 'El disco duro es requerido.'),
-  os: z.enum(['Windows 10 Pro', 'Windows 11 Pro']),
+  storageType: z.string().optional(),
+  os: z.enum(['Windows 10 Pro', 'Windows 11 Pro', 'Linux', 'macOS']),
   osKey: z.string().optional(),
   officeVersion: z.enum([
+    'NINGUNO',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2007',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2010',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2013',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2016',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2019',
     'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021',
-    'MICROSOFT OFFICE HOGAR Y EMPRESAS 2024 - ES-ES'
+    'MICROSOFT OFFICE HOGAR Y EMPRESAS 2024 - ES-ES',
+    'OFFICE 365'
   ]),
   officeKey: z.string().optional(),
 });
@@ -104,7 +109,6 @@ const simpleAssetSchema = z.object({
 
 type ComputerAssetSchema = z.infer<typeof computerAssetSchema>;
 type SimpleAssetSchema = z.infer<typeof simpleAssetSchema>;
-type AnyAssetSchema = ComputerAssetSchema | SimpleAssetSchema;
 
 
 const addHistorySchema = z.object({
@@ -238,8 +242,8 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
 
   const defaultComputerValues = {
       responsable: '', serialNumber: '', invoiceNumber: '', assetName: '',
-      networkName: '', brand: '', model: '', processor: '', ram: '',
-      storage: '', officeKey: '', osKey: '', equipmentType: 'portatil' as const,
+      networkName: '', brand: '', model: '', processor: '', processorGen: '', ram: '', ramType: '',
+      storage: '', storageType: '', officeKey: '', osKey: '', equipmentType: 'portatil' as const,
       os: 'Windows 11 Pro' as const, officeVersion: 'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021' as const,
   };
 
@@ -312,7 +316,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
             </Button>
         )}
         <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="px-6 pb-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="px-6 pb-6 pt-10">
             <div className="mb-6">
                  <FormField
                     control={form.control}
@@ -428,9 +432,18 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Marca</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Dell, HP, APC..." {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona Marca" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {(isComputer ? catalog.pcBrands : assetType === 'UPS' ? catalog.upsBrands : catalog.monitorBrands).map(b => (
+                                <SelectItem key={b} value={b}>{b}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
@@ -445,9 +458,18 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Modelo</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Latitude 5420" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona Modelo" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {catalog.pcModels.map(m => (
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
@@ -497,39 +519,140 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Procesador</FormLabel>
-                    <FormControl>
-                        <Input placeholder="Intel Core i5-1135G7" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona CPU" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {catalog.processors.map(p => (
+                                <SelectItem key={p} value={p}>{p}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
+
                 <FormField
                 control={form.control}
-                name="ram"
+                name="processorGen"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Memoria RAM</FormLabel>
-                    <FormControl>
-                        <Input placeholder="16 GB DDR4" {...field} />
-                    </FormControl>
+                    <FormLabel>Generación</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona Gen" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {catalog.processorGenerations.map(g => (
+                                <SelectItem key={g} value={g}>{g}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
-                <FormField
-                control={form.control}
-                name="storage"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Disco Duro</FormLabel>
-                    <FormControl>
-                        <Input placeholder="512 GB SSD NVMe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
+
+                <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                    control={form.control}
+                    name="ram"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>RAM</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Capac" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {catalog.ramSizes.map(s => (
+                                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="ramType"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Tipo RAM</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {catalog.ramTypes.map(t => (
+                                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                    control={form.control}
+                    name="storage"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Capacidad Disco</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Capac" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {catalog.diskSizes.map(s => (
+                                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="storageType"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Tipo Disco</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Tipo" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {catalog.diskTypes.map(t => (
+                                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+
                 <div className="md:col-span-3" />
                 <FormField
                 control={form.control}
@@ -544,13 +667,15 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2007">Office 2007 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2010">Office 2010 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2013">Office 2013 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2016">Office 2016 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">Office 2019 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">Office 2021 Hogar y Empresas</SelectItem>
-                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2024 - ES-ES">Office 2024 Hogar y Empresas</SelectItem>
+                        <SelectItem value="NINGUNO">Ninguno</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2007">Office 2007</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2010">Office 2010</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2013">Office 2013</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2016">Office 2016</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">Office 2019</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">Office 2021</SelectItem>
+                        <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2024 - ES-ES">Office 2024</SelectItem>
+                        <SelectItem value="OFFICE 365">Office 365</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
@@ -585,6 +710,8 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         <SelectContent>
                         <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
                         <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
+                        <SelectItem value="Linux">Linux</SelectItem>
+                        <SelectItem value="macOS">macOS</SelectItem>
                         </SelectContent>
                     </Select>
                     <FormMessage />
@@ -607,7 +734,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 </>
                 )}
 
-                {/* Simple form specific fields */}
+                {/* Simple form specific fields (Monitor / UPS) */}
                 {!isComputer && (
                     <>
                     <FormField
@@ -617,7 +744,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         <FormItem>
                         <FormLabel>Modelo</FormLabel>
                         <FormControl>
-                            <Input placeholder="Smart-UPS 1500" {...field} />
+                            <Input placeholder="Ej: Smart-UPS 1500, LG 24MK400..." {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -1177,17 +1304,23 @@ function ActivosPageComponent() {
                                 <div className="md:col-span-1"><span className="font-semibold">Marca: </span>{selectedAsset.brand}</div>
                                 <div className="md:col-span-1"><span className="font-semibold">Modelo: </span>{selectedAsset.model}</div>
                                 <div className="md:col-span-1"><span className="font-semibold">Ciudad: </span>{selectedAsset.city}</div>
-                                {selectedAsset.processor && <div className="md:col-span-1"><span className="font-semibold">Procesador: </span>{selectedAsset.processor}</div>}
-                                {selectedAsset.ram && <div className="md:col-span-1"><span className="font-semibold">RAM: </span>{selectedAsset.ram}</div>}
-                                {selectedAsset.storage && <div className="md:col-span-1"><span className="font-semibold">Almacenamiento: </span>{selectedAsset.storage}</div>}
+                                
+                                {selectedAsset.category === 'Equipo de cómputo' && (
+                                  <>
+                                    <div className="md:col-span-1"><span className="font-semibold">Procesador: </span>{selectedAsset.processor} {selectedAsset.processorGen}</div>
+                                    <div className="md:col-span-1"><span className="font-semibold">RAM: </span>{selectedAsset.ram} {selectedAsset.ramType}</div>
+                                    <div className="md:col-span-1"><span className="font-semibold">Disco: </span>{selectedAsset.storage} {selectedAsset.storageType}</div>
+                                  </>
+                                )}
+                                
                                 {selectedAsset.description && <div className="md:col-span-4"><span className="font-semibold">Descripción: </span>{selectedAsset.description}</div>}
                             </div>
 
                             {(selectedAsset.os || selectedAsset.officeVersion) && <Separator className="my-4" />}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                {selectedAsset.os && selectedAsset.osKey && <div className="space-y-1"><div className="font-semibold">Sistema Operativo</div><div>{selectedAsset.os} ({selectedAsset.osKey})</div></div>}
-                                {selectedAsset.officeVersion && selectedAsset.officeKey && <div className="space-y-1"><div className="font-semibold">Office</div><div>{selectedAsset.officeVersion.replace('MICROSOFT OFFICE HOGAR Y EMPRESAS ', '')} ({selectedAsset.officeKey})</div></div>}
+                                {selectedAsset.os && <div className="space-y-1"><div className="font-semibold">Sistema Operativo</div><div>{selectedAsset.os} {selectedAsset.osKey ? `(${selectedAsset.osKey})` : ''}</div></div>}
+                                {selectedAsset.officeVersion && <div className="space-y-1"><div className="font-semibold">Office</div><div>{selectedAsset.officeVersion.replace('MICROSOFT OFFICE HOGAR Y EMPRESAS ', '')} {selectedAsset.officeKey ? `(${selectedAsset.officeKey})` : ''}</div></div>}
                             </div>
                         </CardContent>
                     </Card>
@@ -1300,8 +1433,6 @@ function ActivosPageComponent() {
 }
 
 // Wrapping the component that uses `useSearchParams` in a Suspense boundary
-// is recommended, but for simplicity we'll wrap the page export itself.
-// This is not ideal for performance but works for this case.
 export default function ActivosPage() {
     return (
         <React.Suspense fallback={<div>Cargando...</div>}>
