@@ -2,17 +2,17 @@
 import { addMonths, subDays } from 'date-fns';
 
 export const catalog = {
-  pcModels: ['Latitude 5420', 'ThinkPad T14', 'Elitebook 840 G8', 'Vostro 3400'],
+  pcModels: ['Latitude 5420', 'ThinkPad T14', 'Elitebook 840 G8', 'Vostro 3400', 'OptiPlex 7090'],
   ramSizes: ['2 GB', '4 GB', '8 GB', '16 GB', '32 GB', '64 GB'],
   ramTypes: ['DDR1', 'DDR2', 'DDR3', 'DDR4', 'DDR5'],
   diskSizes: ['250 GB', '480 GB', '512 GB', '1 TB', '2 TB'],
   diskTypes: ['SSD', 'M.2 NVMe', 'HDD'],
-  processors: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7'],
+  processors: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M1', 'Apple M2'],
   processorGenerations: ['8va Gen', '9na Gen', '10ma Gen', '11va Gen', '12va Gen', '13va Gen', '14va Gen'],
   upsBrands: ['APC', 'Tripp Lite', 'CyberPower', 'Forza'],
-  upsModels: ['Smart-UPS 1500', 'Back-UPS 600', 'Pro 1000', 'EASY UPS'],
+  upsModels: ['Smart-UPS 1500', 'Back-UPS 600', 'Pro 1000', 'EASY UPS', 'FX-1500'],
   monitorBrands: ['Dell', 'LG', 'Samsung', 'HP', 'Acer', 'ViewSonic'],
-  monitorModels: ['24MK400', 'UltraWide 29"', 'P2419H', 'EliteDisplay E243'],
+  monitorModels: ['24MK400', 'UltraWide 29"', 'P2419H', 'EliteDisplay E243', 'S2421HN'],
   pcBrands: ['Dell', 'HP', 'Lenovo', 'Asus', 'Apple']
 };
 
@@ -138,7 +138,7 @@ export const deletedAssets = [
     {
       id: 'LAP-000',
       name: 'Laptop HP Probook',
-      category: 'Computadores',
+      category: 'Equipo de cómputo',
       deletionDate: '2023-10-29',
       reason: 'Dañado sin reparación',
     },

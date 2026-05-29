@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -11,11 +12,9 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-  DialogClose,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, X, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, ClipboardPlus, Eye, Replace, Download, Search, Filter, Pencil, Undo2 } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,8 +57,7 @@ import { Separator } from '@/components/ui/separator';
 import AssetHistory from '@/components/dashboard/asset-history';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, companies, catalog } from '@/lib/mock-data';
+import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, catalog } from '@/lib/mock-data';
 
 const computerAssetSchema = z.object({
   responsable: z.string().min(1, 'El responsable es requerido.'),
@@ -128,7 +126,7 @@ function AddHistoryForm({ assetId, onSaveSuccess }: { assetId: string, onSaveSuc
         },
     });
     
-    const technicians = users.filter(u => ['William Aguilera', 'Dylam Moralez', 'Carlos Fierro'].includes(u.name));
+    const technicians = users.filter(u => ['William Aguilera', 'Dylam Moralez', 'Carlos Fierro', 'Whashintong Palma'].includes(u.name));
 
     function onSubmit(data: AddHistorySchema) {
         toast({
@@ -148,7 +146,7 @@ function AddHistoryForm({ assetId, onSaveSuccess }: { assetId: string, onSaveSuc
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Técnico Responsable</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un técnico" />
@@ -253,7 +251,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
 
   return (
     <div className="relative pt-8">
-        {(onBack || isEditMode) && !isEditMode && (
+        {onBack && !isEditMode && (
             <Button variant="ghost" onClick={onBack} className="absolute left-0 top-0">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Volver
@@ -261,36 +259,35 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
         )}
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-                control={form.control}
-                name="responsable"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Responsable</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un responsable" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {users.map(user => (
-                                <SelectItem key={user.id} value={user.name}>{user.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-            
-            <div className={`grid grid-cols-1 ${isComputer ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="responsable"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Responsable</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona un responsable" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {users.map(user => (
+                                    <SelectItem key={user.id} value={user.name}>{user.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 <FormField
                 control={form.control}
                 name="assetName"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Activo / Nombre</FormLabel>
+                    <FormLabel>Nombre del Activo</FormLabel>
                     <FormControl>
                         <Input placeholder={assetType} {...field} />
                     </FormControl>
@@ -298,6 +295,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     </FormItem>
                 )}
                 />
+            </div>
+            
+            <div className={`grid grid-cols-1 md:grid-cols-3 gap-4`}>
                 <FormField
                 control={form.control}
                 name="serialNumber"
@@ -305,7 +305,20 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     <FormItem>
                     <FormLabel>Número de Serie</FormLabel>
                     <FormControl>
-                        <Input placeholder="DXG-12345-ABC" {...field} />
+                        <Input placeholder="SN-123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
+                name="invoiceNumber"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Nº Factura</FormLabel>
+                    <FormControl>
+                        <Input placeholder="FV-001" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -340,6 +353,12 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     </FormItem>
                 )}
                 />
+            </div>
+
+            <Separator />
+            <div className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Especificaciones de Hardware</div>
+
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
                 <FormField
                 control={form.control}
                 name="brand"
@@ -348,7 +367,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     <FormLabel>Marca</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
                         <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Marca" /></SelectTrigger>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar Marca" /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
                             {(isComputer ? catalog.pcBrands : assetType === 'UPS' ? catalog.upsBrands : catalog.monitorBrands).map(b => (
@@ -360,9 +379,6 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     </FormItem>
                 )}
                 />
-                
-                {isComputer ? (
-                <>
                 <FormField
                 control={form.control}
                 name="model"
@@ -370,13 +386,20 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     <FormItem>
                     <FormLabel>Modelo</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Modelo" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.pcModels.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar Modelo" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                            {(isComputer ? catalog.pcModels : assetType === 'UPS' ? catalog.upsModels : catalog.monitorModels).map(m => (
+                                <SelectItem key={m} value={m}>{m}</SelectItem>
+                            ))}
+                        </SelectContent>
                     </Select>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
+                
+                {isComputer && (
+                <>
                 <FormField
                 control={form.control}
                 name="processor"
@@ -393,10 +416,24 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 />
                 <FormField
                 control={form.control}
+                name="processorGen"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Generación</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Generación" /></SelectTrigger></FormControl>
+                        <SelectContent>{catalog.processorGenerations.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
                 name="ram"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Memoria RAM</FormLabel>
+                    <FormLabel>Capacidad RAM</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
                         <FormControl><SelectTrigger><SelectValue placeholder="RAM" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.ramSizes.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
@@ -407,10 +444,24 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 />
                 <FormField
                 control={form.control}
+                name="ramType"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Tipo RAM</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                        <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
                 name="storage"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Almacenamiento</FormLabel>
+                    <FormLabel>Capacidad Disco</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
                         <FormControl><SelectTrigger><SelectValue placeholder="Disco" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
@@ -419,26 +470,108 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     </FormItem>
                 )}
                 />
+                <FormField
+                control={form.control}
+                name="storageType"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Tipo Disco</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                        <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
                 </>
-                ) : (
-                    <FormField
-                    control={form.control}
-                    name="model"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Modelo</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value as string}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="Modelo" /></SelectTrigger></FormControl>
-                            <SelectContent>
-                                {(assetType === 'UPS' ? catalog.upsModels : catalog.monitorModels).map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
                 )}
             </div>
+
+            {isComputer && (
+                <>
+                <Separator />
+                <div className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Software y Licenciamiento</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="os"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Sistema Operativo</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="OS" /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
+                                    <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
+                                    <SelectItem value="Linux">Linux</SelectItem>
+                                    <SelectItem value="macOS">macOS</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="osKey"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Clave SO</FormLabel>
+                            <FormControl><Input placeholder="Clave de producto" {...field} /></FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="officeVersion"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Versión de Office</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Office" /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    <SelectItem value="NINGUNO">NINGUNO</SelectItem>
+                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2016">OFFICE 2016</SelectItem>
+                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
+                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
+                                    <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="officeKey"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Clave Office</FormLabel>
+                            <FormControl><Input placeholder="Clave de producto" {...field} /></FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                </>
+            )}
+
+            {!isComputer && (
+                <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Descripción / Observaciones</FormLabel>
+                    <FormControl><Textarea placeholder="Detalles adicionales..." {...field} /></FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+            )}
+
             <Button type="submit" className="w-full">{isEditMode ? 'Guardar Cambios' : 'Registrar Activo'}</Button>
         </form>
         </Form>
@@ -692,10 +825,11 @@ export default function AssetsPage() {
                                                 <div className="text-muted-foreground">Serial:</div><div className="font-code text-xs">{selectedAsset?.serialNumber}</div>
                                                 {selectedAsset?.category === 'Equipo de cómputo' && (
                                                     <>
-                                                        <div className="text-muted-foreground">Procesador:</div><div>{selectedAsset?.processor}</div>
-                                                        <div className="text-muted-foreground">RAM:</div><div>{selectedAsset?.ram}</div>
-                                                        <div className="text-muted-foreground">Disco:</div><div>{selectedAsset?.storage}</div>
+                                                        <div className="text-muted-foreground">Procesador:</div><div>{selectedAsset?.processor} ({selectedAsset?.processorGen})</div>
+                                                        <div className="text-muted-foreground">RAM:</div><div>{selectedAsset?.ram} {selectedAsset?.ramType}</div>
+                                                        <div className="text-muted-foreground">Disco:</div><div>{selectedAsset?.storage} {selectedAsset?.storageType}</div>
                                                         <div className="text-muted-foreground">S.O:</div><div>{selectedAsset?.os}</div>
+                                                        <div className="text-muted-foreground">Office:</div><div>{selectedAsset?.officeVersion}</div>
                                                     </>
                                                 )}
                                                 {selectedAsset?.description && (
