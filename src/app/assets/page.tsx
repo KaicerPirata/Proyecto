@@ -14,7 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2 } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2, Network } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,7 +55,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import AssetHistory from '@/components/dashboard/asset-history';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, catalog } from '@/lib/mock-data';
 
@@ -265,7 +265,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     name="responsable"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Responsable</FormLabel>
+                        <FormLabel>Responsable del Activo</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value as string}>
                             <FormControl>
                             <SelectTrigger>
@@ -289,7 +289,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                     <FormItem>
                     <FormLabel>Nombre del Activo</FormLabel>
                     <FormControl>
-                        <Input placeholder={assetType} {...field} />
+                        <Input placeholder={`Ej: ${assetType} Gerencia`} {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -303,9 +303,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="serialNumber"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Número de Serie</FormLabel>
+                    <FormLabel>Número de Serie (S/N)</FormLabel>
                     <FormControl>
-                        <Input placeholder="SN-123456" {...field} />
+                        <Input placeholder="SN-123456789" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -316,7 +316,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="invoiceNumber"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Nº Factura</FormLabel>
+                    <FormLabel>Nº Factura de Compra</FormLabel>
                     <FormControl>
                         <Input placeholder="FV-001" {...field} />
                     </FormControl>
@@ -329,7 +329,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="purchaseDate"
                 render={({ field }) => (
                     <FormItem className="flex flex-col">
-                    <FormLabel>Fecha de Compra</FormLabel>
+                    <FormLabel>Fecha de Adquisición</FormLabel>
                     <Popover>
                         <PopoverTrigger asChild>
                         <FormControl>
@@ -356,7 +356,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
             </div>
 
             <Separator />
-            <div className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Especificaciones de Hardware</div>
+            <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wider text-primary">
+                <Laptop className="h-4 w-4" /> Especificaciones de Hardware
+            </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
                 <FormField
@@ -402,12 +404,33 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 <>
                 <FormField
                 control={form.control}
+                name="equipmentType"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Tipo de Equipo</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                        <SelectContent>
+                            <SelectItem value="micro">Micro</SelectItem>
+                            <SelectItem value="portatil">Portátil</SelectItem>
+                            <SelectItem value="servidor">Servidor</SelectItem>
+                            <SelectItem value="sff">SFF (Small Form Factor)</SelectItem>
+                            <SelectItem value="todo en uno">Todo en uno (AIO)</SelectItem>
+                            <SelectItem value="torre">Torre</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                control={form.control}
                 name="processor"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Procesador</FormLabel>
+                    <FormLabel>Procesador (CPU)</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="CPU" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Modelo CPU" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.processors.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
@@ -447,9 +470,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="ramType"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Tipo RAM</FormLabel>
+                    <FormLabel>Tecnología RAM</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo (DDR)" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
@@ -461,9 +484,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="storage"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Capacidad Disco</FormLabel>
+                    <FormLabel>Capacidad Almacenamiento</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Disco" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
@@ -475,9 +498,9 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="storageType"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Tipo Disco</FormLabel>
+                    <FormLabel>Tipo de Disco</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Tecnología" /></SelectTrigger></FormControl>
                         <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                     </Select>
                     <FormMessage />
@@ -491,8 +514,21 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
             {isComputer && (
                 <>
                 <Separator />
-                <div className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Software y Licenciamiento</div>
+                <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wider text-primary">
+                    <Network className="h-4 w-4" /> Software y Red
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="networkName"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Nombre en Red (Hostname)</FormLabel>
+                            <FormControl><Input placeholder="Ej: PC-VENTAS-01" {...field} /></FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="os"
@@ -517,8 +553,8 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         name="osKey"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Clave SO</FormLabel>
-                            <FormControl><Input placeholder="Clave de producto" {...field} /></FormControl>
+                            <FormLabel>Clave de Producto SO</FormLabel>
+                            <FormControl><Input placeholder="XXXXX-XXXXX..." {...field} /></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -528,7 +564,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         name="officeVersion"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Versión de Office</FormLabel>
+                            <FormLabel>Versión de Microsoft Office</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value as string}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Office" /></SelectTrigger></FormControl>
                                 <SelectContent>
@@ -548,8 +584,8 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         name="officeKey"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Clave Office</FormLabel>
-                            <FormControl><Input placeholder="Clave de producto" {...field} /></FormControl>
+                            <FormLabel>Clave de Licencia Office</FormLabel>
+                            <FormControl><Input placeholder="YYYYY-YYYYY..." {...field} /></FormControl>
                             <FormMessage />
                             </FormItem>
                         )}
@@ -564,15 +600,17 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Descripción / Observaciones</FormLabel>
-                    <FormControl><Textarea placeholder="Detalles adicionales..." {...field} /></FormControl>
+                    <FormLabel>Descripción / Observaciones Adicionales</FormLabel>
+                    <FormControl><Textarea placeholder="Detalles técnicos, estado de batería, daños físicos, etc." {...field} /></FormControl>
                     <FormMessage />
                     </FormItem>
                 )}
                 />
             )}
 
-            <Button type="submit" className="w-full">{isEditMode ? 'Guardar Cambios' : 'Registrar Activo'}</Button>
+            <Button type="submit" className="w-full h-12 text-lg font-headline">
+                {isEditMode ? 'Guardar Cambios' : 'Registrar en Inventario'}
+            </Button>
         </form>
         </Form>
     </div>
@@ -657,23 +695,23 @@ export default function AssetsPage() {
                         {userRole !== 'estandar' && (
                             <Dialog open={isCreateOpen} onOpenChange={(open) => { setIsCreateOpen(open); if(!open) setCreateStep(0); }}>
                                 <DialogTrigger asChild>
-                                    <Button><PlusCircle className="mr-2 h-4 w-4" /> Nuevo Activo</Button>
+                                    <Button size="lg"><PlusCircle className="mr-2 h-5 w-5" /> Nuevo Activo</Button>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-3xl">
+                                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                                     <DialogHeader>
-                                        <DialogTitle>Registrar Nuevo Activo</DialogTitle>
-                                        <DialogDescription>Completa los datos técnicos del equipo.</DialogDescription>
+                                        <DialogTitle className="text-2xl font-headline">Registrar Nuevo Activo</DialogTitle>
+                                        <DialogDescription>Selecciona la categoría y completa los datos técnicos.</DialogDescription>
                                     </DialogHeader>
                                     {createStep === 0 ? (
-                                        <div className="grid grid-cols-3 gap-4 py-8">
+                                        <div className="grid grid-cols-3 gap-6 py-12">
                                             {[
                                                 { type: 'Equipo de cómputo', icon: Laptop, label: 'Computador' },
                                                 { type: 'Monitor', icon: Monitor, label: 'Monitor' },
                                                 { type: 'UPS', icon: Zap, label: 'UPS / Energía' }
                                             ].map((item) => (
-                                                <Button key={item.type} variant="outline" className="h-32 flex flex-col gap-3" onClick={() => { setSelectedType(item.type as any); setCreateStep(1); }}>
-                                                    <item.icon className="h-8 w-8" />
-                                                    <span>{item.label}</span>
+                                                <Button key={item.type} variant="outline" className="h-40 flex flex-col gap-4 hover:border-primary hover:bg-primary/5 transition-all" onClick={() => { setSelectedType(item.type as any); setCreateStep(1); }}>
+                                                    <item.icon className="h-12 w-12 text-primary" />
+                                                    <span className="font-headline text-lg">{item.label}</span>
                                                 </Button>
                                             ))}
                                         </div>
@@ -688,25 +726,26 @@ export default function AssetsPage() {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle>Inventario</CardTitle>
-                                <div className="relative w-64">
+                                <CardTitle className="font-headline">Inventario General</CardTitle>
+                                <div className="relative w-80">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input placeholder="Buscar por serial, ID, nombre..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                                    <Input placeholder="Buscar por serial, ID, marca..." className="pl-8" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                                 </div>
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <Tabs defaultValue="active">
-                                <TabsList className="mb-4">
-                                    <TabsTrigger value="active">Listado de Activos</TabsTrigger>
-                                    {userRole !== 'estandar' && <TabsTrigger value="deleted">Activos Eliminados</TabsTrigger>}
+                            <Tabs defaultValue="active" className="w-full">
+                                <TabsList className="mb-6">
+                                    <TabsTrigger value="active" className="px-8">Activos Operativos</TabsTrigger>
+                                    {userRole !== 'estandar' && <TabsTrigger value="deleted" className="px-8">Papelera de Bajas</TabsTrigger>}
                                 </TabsList>
                                 <TabsContent value="active">
                                     <Table>
                                         <TableHeader>
-                                            <TableRow>
-                                                <TableHead>ID / Nombre</TableHead>
+                                            <TableRow className="bg-muted/50 hover:bg-muted/50">
+                                                <TableHead className="w-[120px]">ID Activo</TableHead>
                                                 <TableHead>Categoría</TableHead>
+                                                <TableHead>Nombre / Descrip.</TableHead>
                                                 <TableHead>Responsable</TableHead>
                                                 <TableHead>Serial</TableHead>
                                                 <TableHead>Marca/Modelo</TableHead>
@@ -715,41 +754,46 @@ export default function AssetsPage() {
                                         </TableHeader>
                                         <TableBody>
                                             {filteredAssets.map((asset) => (
-                                                <TableRow key={asset.id}>
-                                                    <TableCell className="font-medium">
-                                                        <div className="flex flex-col">
-                                                            <span>{asset.id}</span>
-                                                            <span className="text-xs text-muted-foreground truncate max-w-[150px]">{asset.name}</span>
-                                                        </div>
+                                                <TableRow key={asset.id} className="group">
+                                                    <TableCell className="font-bold text-primary">{asset.id}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="secondary" className="font-normal">{asset.category}</Badge>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge variant="secondary">{asset.category}</Badge>
+                                                        <span className="text-sm font-medium">{asset.name}</span>
                                                     </TableCell>
-                                                    <TableCell>{asset.responsable}</TableCell>
-                                                    <TableCell className="font-code text-xs">{asset.serialNumber}</TableCell>
-                                                    <TableCell>{asset.brand} {asset.model}</TableCell>
+                                                    <TableCell className="text-sm">{asset.responsable}</TableCell>
+                                                    <TableCell className="font-code text-xs text-muted-foreground">{asset.serialNumber}</TableCell>
+                                                    <TableCell className="text-sm">{asset.brand} {asset.model}</TableCell>
                                                     <TableCell className="text-right">
-                                                        <div className="flex justify-end gap-2">
+                                                        <div className="flex justify-end gap-1">
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" onClick={() => handleViewDetails(asset)}><Eye className="h-4 w-4" /></Button>
+                                                                        <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary" onClick={() => handleViewDetails(asset)}><Eye className="h-4 w-4" /></Button>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent>Ver Hoja de Vida</TooltipContent>
+                                                                    <TooltipContent>Hoja de Vida</TooltipContent>
                                                                 </Tooltip>
                                                                 {userRole !== 'estandar' && (
                                                                     <AlertDialog>
-                                                                        <AlertDialogTrigger asChild>
-                                                                            <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                                                        </AlertDialogTrigger>
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <AlertDialogTrigger asChild>
+                                                                                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10"><Trash2 className="h-4 w-4" /></Button>
+                                                                                </AlertDialogTrigger>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>Dar de Baja</TooltipContent>
+                                                                        </Tooltip>
                                                                         <AlertDialogContent>
                                                                             <AlertDialogHeader>
-                                                                                <AlertDialogTitle>¿Dar de baja este activo?</AlertDialogTitle>
-                                                                                <AlertDialogDescription>El equipo se moverá a la lista de eliminados pero conservará su historial.</AlertDialogDescription>
+                                                                                <AlertDialogTitle className="font-headline text-2xl">¿Dar de baja este activo?</AlertDialogTitle>
+                                                                                <AlertDialogDescription>
+                                                                                    El equipo se moverá a la lista de eliminados. Conservará su historial pero dejará de contar en el inventario activo.
+                                                                                </AlertDialogDescription>
                                                                             </AlertDialogHeader>
                                                                             <AlertDialogFooter>
                                                                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                                                <AlertDialogAction onClick={() => handleDeleteAsset(asset.id)}>Confirmar</AlertDialogAction>
+                                                                                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteAsset(asset.id)}>Confirmar Baja</AlertDialogAction>
                                                                             </AlertDialogFooter>
                                                                         </AlertDialogContent>
                                                                     </AlertDialog>
@@ -759,15 +803,22 @@ export default function AssetsPage() {
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
+                                            {filteredAssets.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                                                        No se encontraron activos que coincidan con la búsqueda.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
                                         </TableBody>
                                     </Table>
                                 </TabsContent>
                                 <TabsContent value="deleted">
                                     <Table>
                                         <TableHeader>
-                                            <TableRow>
+                                            <TableRow className="bg-muted/50">
                                                 <TableHead>ID / Nombre</TableHead>
-                                                <TableHead>Fecha Baja</TableHead>
+                                                <TableHead>Fecha de Baja</TableHead>
                                                 <TableHead>Motivo</TableHead>
                                                 <TableHead className="text-right">Acciones</TableHead>
                                             </TableRow>
@@ -775,14 +826,21 @@ export default function AssetsPage() {
                                         <TableBody>
                                             {deletedAssets.map((asset) => (
                                                 <TableRow key={asset.id}>
-                                                    <TableCell className="font-medium">{asset.id} - {asset.name}</TableCell>
+                                                    <TableCell className="font-medium text-destructive">{asset.id} - {asset.name}</TableCell>
                                                     <TableCell>{(asset as any).deletionDate}</TableCell>
-                                                    <TableCell className="text-xs italic">{(asset as any).reason}</TableCell>
+                                                    <TableCell className="text-sm italic text-muted-foreground">{(asset as any).reason}</TableCell>
                                                     <TableCell className="text-right">
-                                                        <Button variant="outline" size="sm" onClick={() => handleRestoreAsset(asset.id)}><Undo2 className="mr-2 h-4 w-4" /> Restaurar</Button>
+                                                        <Button variant="outline" size="sm" className="hover:border-primary hover:text-primary" onClick={() => handleRestoreAsset(asset.id)}><Undo2 className="mr-2 h-4 w-4" /> Restaurar</Button>
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
+                                            {deletedAssets.length === 0 && (
+                                                <TableRow>
+                                                    <TableCell colSpan={4} className="h-32 text-center text-muted-foreground font-italic">
+                                                        No hay activos en la papelera.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
                                         </TableBody>
                                     </Table>
                                 </TabsContent>
@@ -792,20 +850,23 @@ export default function AssetsPage() {
                 </main>
 
                 <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <div className="flex items-center justify-between">
-                                <DialogTitle className="text-2xl font-headline">Hoja de Vida: {selectedAsset?.id}</DialogTitle>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" /> PDF</Button>
+                            <div className="flex items-center justify-between border-b pb-4">
+                                <div>
+                                    <DialogTitle className="text-3xl font-headline text-primary">Hoja de Vida: {selectedAsset?.id}</DialogTitle>
+                                    <DialogDescription className="text-base">Consulta técnica y trazabilidad del equipo.</DialogDescription>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button variant="outline" size="sm" className="font-headline"><Download className="mr-2 h-4 w-4" /> Exportar Hoja de Vida (PDF)</Button>
                                     {userRole !== 'estandar' && !isEditing && (
-                                        <Button size="sm" onClick={() => setIsEditing(true)}><Pencil className="mr-2 h-4 w-4" /> Editar</Button>
+                                        <Button size="sm" className="font-headline" onClick={() => setIsEditing(true)}><Pencil className="mr-2 h-4 w-4" /> Editar Especificaciones</Button>
                                     )}
                                 </div>
                             </div>
                         </DialogHeader>
                         
-                        <div className="space-y-6 pt-4">
+                        <div className="space-y-8 pt-6">
                             {isEditing ? (
                                 <AssetForm 
                                     assetType={selectedAsset?.category} 
@@ -814,47 +875,78 @@ export default function AssetsPage() {
                                     onSaveSuccess={() => { setIsEditing(false); setIsDetailsOpen(false); }} 
                                 />
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
-                                        <Card>
-                                            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Especificaciones Técnicas</CardTitle></CardHeader>
-                                            <CardContent className="grid grid-cols-2 gap-y-3 text-sm">
-                                                <div className="text-muted-foreground">Responsable:</div><div className="font-medium">{selectedAsset?.responsable}</div>
-                                                <div className="text-muted-foreground">Marca:</div><div>{selectedAsset?.brand}</div>
-                                                <div className="text-muted-foreground">Modelo:</div><div>{selectedAsset?.model}</div>
-                                                <div className="text-muted-foreground">Serial:</div><div className="font-code text-xs">{selectedAsset?.serialNumber}</div>
-                                                {selectedAsset?.category === 'Equipo de cómputo' && (
-                                                    <>
-                                                        <div className="text-muted-foreground">Procesador:</div><div>{selectedAsset?.processor} ({selectedAsset?.processorGen})</div>
-                                                        <div className="text-muted-foreground">RAM:</div><div>{selectedAsset?.ram} {selectedAsset?.ramType}</div>
-                                                        <div className="text-muted-foreground">Disco:</div><div>{selectedAsset?.storage} {selectedAsset?.storageType}</div>
-                                                        <div className="text-muted-foreground">S.O:</div><div>{selectedAsset?.os}</div>
-                                                        <div className="text-muted-foreground">Office:</div><div>{selectedAsset?.officeVersion}</div>
-                                                    </>
-                                                )}
-                                                {selectedAsset?.description && (
-                                                    <div className="col-span-2 pt-2 border-t mt-2">
-                                                        <div className="text-muted-foreground mb-1">Descripción:</div>
-                                                        <div className="italic text-xs">{selectedAsset.description}</div>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    <div className="lg:col-span-2 space-y-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <Card className="shadow-none bg-muted/30">
+                                                <CardHeader className="pb-2"><CardTitle className="text-sm font-bold uppercase text-primary">Información General</CardTitle></CardHeader>
+                                                <CardContent className="grid grid-cols-1 gap-y-3 text-sm">
+                                                    <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Responsable:</span><span className="font-bold">{selectedAsset?.responsable}</span></div>
+                                                    <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Marca:</span><span>{selectedAsset?.brand}</span></div>
+                                                    <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Modelo:</span><span>{selectedAsset?.model}</span></div>
+                                                    <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Serial S/N:</span><span className="font-code text-xs">{selectedAsset?.serialNumber}</span></div>
+                                                    <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Factura:</span><span>{selectedAsset?.invoiceNumber || 'N/A'}</span></div>
+                                                    <div className="flex justify-between py-1"><span className="text-muted-foreground">Fecha Compra:</span><span>{selectedAsset?.purchaseDate}</span></div>
+                                                </CardContent>
+                                            </Card>
+
+                                            {selectedAsset?.category === 'Equipo de cómputo' && (
+                                                <Card className="shadow-none bg-muted/30">
+                                                    <CardHeader className="pb-2"><CardTitle className="text-sm font-bold uppercase text-primary">Hardware & Red</CardTitle></CardHeader>
+                                                    <CardContent className="grid grid-cols-1 gap-y-3 text-sm">
+                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Hostname:</span><span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span></div>
+                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Procesador:</span><span>{selectedAsset?.processor} {selectedAsset?.processorGen}</span></div>
+                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">RAM:</span><span>{selectedAsset?.ram} {selectedAsset?.ramType}</span></div>
+                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Disco:</span><span>{selectedAsset?.storage} {selectedAsset?.storageType}</span></div>
+                                                        <div className="flex justify-between py-1"><span className="text-muted-foreground">Tipo Equipo:</span><span className="capitalize">{selectedAsset?.equipmentType || 'N/A'}</span></div>
+                                                    </CardContent>
+                                                </Card>
+                                            )}
+                                        </div>
+
+                                        {selectedAsset?.category === 'Equipo de cómputo' && (
+                                            <Card className="shadow-none bg-muted/30">
+                                                <CardHeader className="pb-2"><CardTitle className="text-sm font-bold uppercase text-primary">Software y Licenciamiento</CardTitle></CardHeader>
+                                                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+                                                    <div>
+                                                        <p className="text-muted-foreground mb-1">Sistema Operativo:</p>
+                                                        <p className="font-medium">{selectedAsset?.os}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">Key: <span className="font-code">{selectedAsset?.osKey || 'N/A'}</span></p>
                                                     </div>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                        {userRole !== 'estandar' && (
-                                            <Button variant="outline" className="w-full" onClick={() => setIsAddingHistory(!isAddingHistory)}>
-                                                {isAddingHistory ? 'Cerrar Formulario' : 'Añadir Registro al Historial'}
-                                            </Button>
-                                        )}
-                                        {isAddingHistory && (
-                                            <Card className="border-primary/50">
-                                                <CardHeader><CardTitle className="text-sm">Nuevo Registro</CardTitle></CardHeader>
-                                                <CardContent>
-                                                    <AddHistoryForm assetId={selectedAsset?.id} onSaveSuccess={() => setIsAddingHistory(false)} />
+                                                    <div>
+                                                        <p className="text-muted-foreground mb-1">Microsoft Office:</p>
+                                                        <p className="font-medium">{selectedAsset?.officeVersion}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">Key: <span className="font-code">{selectedAsset?.officeKey || 'N/A'}</span></p>
+                                                    </div>
                                                 </CardContent>
                                             </Card>
                                         )}
+
+                                        {selectedAsset?.description && (
+                                            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <p className="text-xs font-bold text-yellow-800 uppercase mb-2">Observaciones / Notas Técnicas:</p>
+                                                <p className="text-sm text-yellow-900 italic">{selectedAsset.description}</p>
+                                            </div>
+                                        )}
+
+                                        {userRole !== 'estandar' && (
+                                            <div className="space-y-4">
+                                                <Button variant={isAddingHistory ? "secondary" : "default"} className="w-full h-12 font-headline" onClick={() => setIsAddingHistory(!isAddingHistory)}>
+                                                    {isAddingHistory ? 'Cancelar Registro' : 'Añadir Nueva Intervención Técnica'}
+                                                </Button>
+                                                {isAddingHistory && (
+                                                    <Card className="border-primary">
+                                                        <CardHeader><CardTitle className="text-lg font-headline">Nuevo Registro de Historial</CardTitle></CardHeader>
+                                                        <CardContent>
+                                                            <AddHistoryForm assetId={selectedAsset?.id} onSaveSuccess={() => setIsAddingHistory(false)} />
+                                                        </CardContent>
+                                                    </Card>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="space-y-6">
+
+                                    <div className="lg:col-span-1">
                                         <AssetHistory assetId={selectedAsset?.id} />
                                     </div>
                                 </div>
