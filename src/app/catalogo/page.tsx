@@ -64,7 +64,7 @@ export default function CatalogoPage() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Icon className="h-5 w-5 text-primary" />
-            <CardTitle>{title}</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
           </div>
           <CardDescription>{description}</CardDescription>
         </div>
@@ -81,7 +81,7 @@ export default function CatalogoPage() {
             </DialogHeader>
             <div className="py-4">
               <Input
-                placeholder="Ej: 32 GB, NVMe, Core i9..."
+                placeholder="Ingresar nuevo valor..."
                 value={newItem}
                 onChange={(e) => setNewItem(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addItem(catalogKey)}
@@ -159,8 +159,8 @@ export default function CatalogoPage() {
               <TabsTrigger value="procesador" className="flex gap-2">
                 <Cpu className="h-4 w-4" /> Procesadores
               </TabsTrigger>
-              <TabsTrigger value="marcas" className="flex gap-2">
-                <MonitorIcon className="h-4 w-4" /> Marcas UPS/Mon
+              <TabsTrigger value="ups-mon" className="flex gap-2">
+                <Zap className="h-4 w-4" /> UPS & Monitores
               </TabsTrigger>
             </TabsList>
 
@@ -240,8 +240,8 @@ export default function CatalogoPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="marcas" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TabsContent value="ups-mon" className="space-y-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <CatalogSection
                   title="Marcas de UPS"
                   description="Proveedores de respaldo de energía."
@@ -250,10 +250,26 @@ export default function CatalogoPage() {
                   icon={Zap}
                 />
                 <CatalogSection
+                  title="Modelos de UPS"
+                  description="Modelos específicos de equipos UPS."
+                  items={catalog.upsModels}
+                  catalogKey="upsModels"
+                  icon={Zap}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CatalogSection
                   title="Marcas de Monitor"
                   description="Fabricantes de pantallas."
                   items={catalog.monitorBrands}
                   catalogKey="monitorBrands"
+                  icon={MonitorIcon}
+                />
+                <CatalogSection
+                  title="Modelos de Monitor"
+                  description="Modelos específicos de monitores."
+                  items={catalog.monitorModels}
+                  catalogKey="monitorModels"
                   icon={MonitorIcon}
                 />
               </div>

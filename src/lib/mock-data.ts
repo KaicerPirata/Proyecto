@@ -10,7 +10,9 @@ export const catalog = {
   processors: ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 5', 'AMD Ryzen 7'],
   processorGenerations: ['8va Gen', '9na Gen', '10ma Gen', '11va Gen', '12va Gen', '13va Gen', '14va Gen'],
   upsBrands: ['APC', 'Tripp Lite', 'CyberPower', 'Forza'],
+  upsModels: ['Smart-UPS 1500', 'Back-UPS 600', 'Pro 1000', 'EASY UPS'],
   monitorBrands: ['Dell', 'LG', 'Samsung', 'HP', 'Acer', 'ViewSonic'],
+  monitorModels: ['24MK400', 'UltraWide 29"', 'P2419H', 'EliteDisplay E243'],
   pcBrands: ['Dell', 'HP', 'Lenovo', 'Asus', 'Apple']
 };
 
@@ -51,7 +53,7 @@ export const assets = [
     purchaseDate: '2022-11-30',
     invoiceNumber: 'FV-2022-5678',
     brand: 'LG',
-    model: '29WL500-B',
+    model: 'UltraWide 29"',
     description: 'Monitor con resolución 2560x1080.',
   },
   {
