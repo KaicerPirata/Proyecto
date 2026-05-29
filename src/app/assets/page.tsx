@@ -14,7 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2, Network } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2, Network, Cpu, HardDrive } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -401,115 +401,140 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 />
                 
                 {isComputer && (
-                <>
-                <FormField
-                control={form.control}
-                name="equipmentType"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Tipo de Equipo</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                            <SelectItem value="micro">Micro</SelectItem>
-                            <SelectItem value="portatil">Portátil</SelectItem>
-                            <SelectItem value="servidor">Servidor</SelectItem>
-                            <SelectItem value="sff">SFF (Small Form Factor)</SelectItem>
-                            <SelectItem value="todo en uno">Todo en uno (AIO)</SelectItem>
-                            <SelectItem value="torre">Torre</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="processor"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Procesador (CPU)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Modelo CPU" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.processors.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="processorGen"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Generación</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Generación" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.processorGenerations.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="ram"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Capacidad RAM</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="RAM" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.ramSizes.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="ramType"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Tecnología RAM</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Tipo (DDR)" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="storage"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Capacidad Almacenamiento</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="storageType"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Tipo de Disco</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value as string}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Tecnología" /></SelectTrigger></FormControl>
-                        <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                </>
+                    <div className="md:col-span-2">
+                        <FormField
+                            control={form.control}
+                            name="equipmentType"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Tipo de Equipo</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value as string}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Tipo" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="micro">Micro</SelectItem>
+                                        <SelectItem value="portatil">Portátil</SelectItem>
+                                        <SelectItem value="servidor">Servidor</SelectItem>
+                                        <SelectItem value="sff">SFF (Small Form Factor)</SelectItem>
+                                        <SelectItem value="todo en uno">Todo en uno (AIO)</SelectItem>
+                                        <SelectItem value="torre">Torre</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 )}
             </div>
+
+            {isComputer && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Procesador Group */}
+                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
+                        <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
+                            <Cpu className="h-3 w-3" /> Procesador
+                        </div>
+                        <FormField
+                        control={form.control}
+                        name="processor"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Modelo de CPU</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Modelo CPU" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.processors.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="processorGen"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Generación</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Generación" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.processorGenerations.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+
+                    {/* RAM Group */}
+                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
+                        <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
+                            <Cpu className="h-3 w-3" /> Memoria RAM
+                        </div>
+                        <FormField
+                        control={form.control}
+                        name="ram"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Capacidad RAM</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="RAM" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.ramSizes.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="ramType"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Tecnología (DDR)</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Tipo (DDR)" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+
+                    {/* Disco Group */}
+                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
+                        <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
+                            <HardDrive className="h-3 w-3" /> Almacenamiento
+                        </div>
+                        <FormField
+                        control={form.control}
+                        name="storage"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Capacidad de Disco</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="storageType"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Tipo de Disco</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value as string}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Tecnología" /></SelectTrigger></FormControl>
+                                <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                </div>
+            )}
 
             {isComputer && (
                 <>
@@ -530,7 +555,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         )}
                     />
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
+                    <div className="border p-4 rounded-lg bg-muted/20 space-y-4">
                         <FormField
                             control={form.control}
                             name="os"
@@ -556,14 +581,14 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Clave de Producto SO</FormLabel>
-                                    <FormControl><Input placeholder="XXXXX-XXXXX-XXXXX..." {...field} /></FormControl>
+                                    <FormControl><Input placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
+                    <div className="border p-4 rounded-lg bg-muted/20 space-y-4">
                         <FormField
                             control={form.control}
                             name="officeVersion"
@@ -590,7 +615,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Clave de Licencia Office</FormLabel>
-                                    <FormControl><Input placeholder="YYYYY-YYYYY-YYYYY..." {...field} /></FormControl>
+                                    <FormControl><Input placeholder="YYYYY-YYYYY-YYYYY-YYYYY-YYYYY" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
