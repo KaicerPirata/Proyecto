@@ -517,79 +517,85 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                 <div className="flex items-center gap-2 font-semibold text-sm uppercase tracking-wider text-primary">
                     <Network className="h-4 w-4" /> Software y Red
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-6">
                     <FormField
                         control={form.control}
                         name="networkName"
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel>Nombre en Red (Hostname)</FormLabel>
-                            <FormControl><Input placeholder="Ej: PC-VENTAS-01" {...field} /></FormControl>
-                            <FormMessage />
+                                <FormLabel>Nombre en Red (Hostname)</FormLabel>
+                                <FormControl><Input placeholder="Ej: PC-VENTAS-01" {...field} /></FormControl>
+                                <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="os"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Sistema Operativo</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="OS" /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
-                                    <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
-                                    <SelectItem value="Linux">Linux</SelectItem>
-                                    <SelectItem value="macOS">macOS</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="osKey"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Clave de Producto SO</FormLabel>
-                            <FormControl><Input placeholder="XXXXX-XXXXX..." {...field} /></FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="officeVersion"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Versión de Microsoft Office</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Office" /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    <SelectItem value="NINGUNO">NINGUNO</SelectItem>
-                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2016">OFFICE 2016</SelectItem>
-                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
-                                    <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
-                                    <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="officeKey"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Clave de Licencia Office</FormLabel>
-                            <FormControl><Input placeholder="YYYYY-YYYYY..." {...field} /></FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
+                        <FormField
+                            control={form.control}
+                            name="os"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sistema Operativo</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value as string}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="OS" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
+                                            <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
+                                            <SelectItem value="Linux">Linux</SelectItem>
+                                            <SelectItem value="macOS">macOS</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="osKey"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Clave de Producto SO</FormLabel>
+                                    <FormControl><Input placeholder="XXXXX-XXXXX-XXXXX..." {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-lg bg-muted/20">
+                        <FormField
+                            control={form.control}
+                            name="officeVersion"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Versión de Microsoft Office</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value as string}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Office" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="NINGUNO">NINGUNO</SelectItem>
+                                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2016">OFFICE 2016</SelectItem>
+                                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
+                                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
+                                            <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="officeKey"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Clave de Licencia Office</FormLabel>
+                                    <FormControl><Input placeholder="YYYYY-YYYYY-YYYYY..." {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                 </div>
                 </>
             )}
