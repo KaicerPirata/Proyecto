@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -54,7 +53,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -64,7 +62,6 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -229,7 +226,10 @@ function AssetForm({
 
   const defaultValues = useMemo(() => {
     if (isEditMode) {
-      return { ...assetToEdit, purchaseDate: assetToEdit.purchaseDate ? new Date(assetToEdit.purchaseDate) : new Date() };
+      return { 
+        ...assetToEdit, 
+        purchaseDate: assetToEdit.purchaseDate ? new Date(assetToEdit.purchaseDate) : new Date() 
+      };
     }
     if (isComputer) {
       return {
@@ -379,7 +379,7 @@ function AssetForm({
             <Laptop className="h-4 w-4" /> Especificaciones de Hardware
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="brand"
@@ -433,7 +433,7 @@ function AssetForm({
           </div>
 
           {isComputer && (
-            <div className="space-y-8">
+            <div className="space-y-12">
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -483,23 +483,23 @@ function AssetForm({
                 />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-bold flex items-center gap-2">
-                    <Cpu className="h-4 w-4" /> Memoria RAM
+                    <Cpu className="h-4 w-4" /> Configuración de RAM
                   </h4>
                   <Button type="button" variant="outline" size="sm" onClick={() => appendRam({ size: '', type: firstRamType || '' })}>
-                    <Plus className="h-3 w-3 mr-2" /> Añadir RAM
+                    <Plus className="h-3 w-3 mr-2" /> Añadir Módulo
                   </Button>
                 </div>
                 {ramFields.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-6 border rounded-xl bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`rams.${index}.size`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Capacidad RAM ({index + 1})</FormLabel>
+                          <FormLabel>Capacidad Módulo {index + 1}</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -522,7 +522,7 @@ function AssetForm({
                       name={`rams.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo de RAM ({index + 1})</FormLabel>
+                          <FormLabel>Tipo de RAM {index + 1}</FormLabel>
                           <Select
                             onValueChange={(val) => {
                               field.onChange(val);
@@ -546,12 +546,12 @@ function AssetForm({
                               ))}
                             </SelectContent>
                           </Select>
-                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Bloqueado para compatibilidad.</p>}
+                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Forzado por compatibilidad física.</p>}
                         </FormItem>
                       )}
                     />
                     {ramFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeRam(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-3 top-3 text-destructive" onClick={() => removeRam(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -559,23 +559,23 @@ function AssetForm({
                 ))}
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-bold flex items-center gap-2">
                     <HardDrive className="h-4 w-4" /> Almacenamiento
                   </h4>
                   <Button type="button" variant="outline" size="sm" onClick={() => appendStorage({ size: '', type: '' })}>
-                    <Plus className="h-3 w-3 mr-2" /> Añadir Disco
+                    <Plus className="h-3 w-3 mr-2" /> Añadir Unidad
                   </Button>
                 </div>
                 {storageFields.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-6 border rounded-xl bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`storages.${index}.size`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Capacidad Disco ({index + 1})</FormLabel>
+                          <FormLabel>Capacidad Disco {index + 1}</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -598,7 +598,7 @@ function AssetForm({
                       name={`storages.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tipo de Disco ({index + 1})</FormLabel>
+                          <FormLabel>Tipo de Disco {index + 1}</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -617,7 +617,7 @@ function AssetForm({
                       )}
                     />
                     {storageFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeStorage(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-3 top-3 text-destructive" onClick={() => removeStorage(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -643,7 +643,7 @@ function AssetForm({
                 )}
               />
 
-              <div className="space-y-6">
+              <div className="space-y-12">
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
@@ -672,7 +672,7 @@ function AssetForm({
                     name="osKey"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Clave de Licencia (Windows)</FormLabel>
+                        <FormLabel>Product Key (Windows)</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="XXXXX-XXXXX-..." />
                         </FormControl>
@@ -687,7 +687,7 @@ function AssetForm({
                     name="officeVersion"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Versión Office</FormLabel>
+                        <FormLabel>Versión Microsoft Office</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value as string}>
                           <FormControl>
                             <SelectTrigger>
@@ -709,7 +709,7 @@ function AssetForm({
                     name="officeKey"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Clave de Licencia (Office)</FormLabel>
+                        <FormLabel>Product Key (Office)</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="YYYYY-YYYYY-..." />
                         </FormControl>
@@ -729,14 +729,14 @@ function AssetForm({
                 <FormItem>
                   <FormLabel>Notas / Descripción</FormLabel>
                   <FormControl>
-                    <Textarea {...field} />
+                    <Textarea className="min-h-[120px]" {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
           )}
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full py-6 text-lg font-bold">
             {isEditMode ? 'Actualizar Información' : 'Registrar en Inventario'}
           </Button>
         </form>
@@ -979,7 +979,7 @@ export default function AssetsPage() {
                           <span className="font-code text-primary">{selectedAsset?.serialNumber}</span>
                         </div>
                         <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Nombre Red (Hostname)</span>
+                          <span className="text-xs text-muted-foreground uppercase">Hostname (Red)</span>
                           <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
                         </div>
                         <div className="flex flex-col border-b pb-2">
@@ -1000,28 +1000,28 @@ export default function AssetsPage() {
                     {(selectedAsset?.category === 'Equipo de cómputo' || selectedAsset?.processor) && (
                       <Card className="bg-muted/30 p-6 border-none shadow-none">
                         <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                          <Cpu className="h-4 w-4" /> Especificaciones de Hardware
+                          <Cpu className="h-4 w-4" /> Configuración de Hardware
                         </h3>
                         <div className="space-y-6">
-                          <div className="bg-background p-4 rounded-lg border flex flex-col gap-1">
-                            <span className="text-xs font-bold text-muted-foreground uppercase">Procesador e Hilo Técnico</span>
+                          <div className="bg-background p-4 rounded-xl border flex flex-col gap-1">
+                            <span className="text-xs font-bold text-muted-foreground uppercase">Procesador e Hilo</span>
                             <div className="font-bold flex items-center gap-2 text-lg">
                               <Cpu className="h-5 w-5 text-primary" />
                               {selectedAsset?.processor}
                             </div>
                             <div className="text-sm text-primary font-medium pl-7">
-                              Generación: {selectedAsset?.processorGen || 'No especificada'}
+                              Generación: {selectedAsset?.processorGen || 'Desconocida'}
                             </div>
                           </div>
 
                           <div className="space-y-3">
-                            <span className="text-xs font-bold text-muted-foreground uppercase block">Configuración de Memoria RAM</span>
+                            <span className="text-xs font-bold text-muted-foreground uppercase block">Módulos de Memoria RAM</span>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {selectedAsset?.rams?.map((r: any, i: number) => (
-                                <div key={i} className="bg-background p-3 rounded-lg border flex flex-col gap-1">
-                                  <span className="text-[10px] font-bold text-muted-foreground">MÓDULO {i + 1}</span>
+                                <div key={i} className="bg-background p-4 rounded-xl border flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold text-muted-foreground">MOD {i + 1}</span>
                                   <div className="font-bold text-base">{r.size}</div>
-                                  <div className="text-xs text-primary font-medium">Tecnología: {r.type}</div>
+                                  <div className="text-xs text-primary font-medium">{r.type}</div>
                                 </div>
                               ))}
                             </div>
@@ -1031,10 +1031,10 @@ export default function AssetsPage() {
                             <span className="text-xs font-bold text-muted-foreground uppercase block">Unidades de Almacenamiento</span>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {selectedAsset?.storages?.map((s: any, i: number) => (
-                                <div key={i} className="bg-background p-3 rounded-lg border flex flex-col gap-1">
+                                <div key={i} className="bg-background p-4 rounded-xl border flex flex-col gap-1">
                                   <span className="text-[10px] font-bold text-muted-foreground">DISCO {i + 1}</span>
                                   <div className="font-bold text-base">{s.size}</div>
-                                  <div className="text-xs text-accent font-medium">Tipo: {s.type}</div>
+                                  <div className="text-xs text-accent font-medium">{s.type}</div>
                                 </div>
                               ))}
                             </div>
@@ -1049,7 +1049,7 @@ export default function AssetsPage() {
                           <ShieldCheck className="h-4 w-4" /> Software & Licenciamiento
                         </h3>
                         <div className="grid grid-cols-1 gap-6">
-                          <div className="p-4 bg-background rounded-lg border space-y-3">
+                          <div className="p-4 bg-background rounded-xl border space-y-3">
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
                                 <Monitor className="h-3 w-3" /> Sistema Operativo
@@ -1057,12 +1057,12 @@ export default function AssetsPage() {
                               <p className="font-bold text-lg">{selectedAsset?.os}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-md border-l-4 border-primary">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Licencia)</span>
-                              <p className="font-code text-sm break-all">{selectedAsset?.osKey || 'LICENCIA DIGITAL / OEM'}</p>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (SO)</span>
+                              <p className="font-code text-sm break-all">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
 
-                          <div className="p-4 bg-background rounded-lg border space-y-3">
+                          <div className="p-4 bg-background rounded-xl border space-y-3">
                             <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
                                 <FileText className="h-3 w-3" /> Microsoft Office
@@ -1070,8 +1070,8 @@ export default function AssetsPage() {
                               <p className="font-bold text-lg">{selectedAsset?.officeVersion}</p>
                             </div>
                             <div className="p-3 bg-muted/50 rounded-md border-l-4 border-accent">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Licencia)</span>
-                              <p className="font-code text-sm break-all">{selectedAsset?.officeKey || 'SIN LICENCIA REGISTRADA'}</p>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Office)</span>
+                              <p className="font-code text-sm break-all">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
                         </div>
@@ -1083,13 +1083,13 @@ export default function AssetsPage() {
                     {userRole !== 'estandar' && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="font-bold text-sm">Intervenciones Técnicas</h4>
+                          <h4 className="font-bold text-sm">Registro de Intervenciones</h4>
                           <Button 
                             variant={isAddingHistory ? 'ghost' : 'default'} 
                             size="sm" 
                             onClick={() => setIsAddingHistory(!isAddingHistory)}
                           >
-                            {isAddingHistory ? 'Cancelar' : 'Nuevo Registro'}
+                            {isAddingHistory ? 'Cancelar' : 'Añadir Entrada'}
                           </Button>
                         </div>
                         {isAddingHistory && (
@@ -1116,4 +1116,3 @@ export default function AssetsPage() {
     </DashboardLayout>
   );
 }
-
