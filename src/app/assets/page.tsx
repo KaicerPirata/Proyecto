@@ -83,6 +83,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import AssetHistory from '@/components/dashboard/asset-history';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -833,9 +834,18 @@ export default function AssetsPage() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Asignado': return <Badge variant="default" className="bg-blue-600">Asignado</Badge>;
+      case 'En Almacén': return <Badge variant="secondary">En Almacén</Badge>;
+      case 'Mantenimiento': return <Badge variant="destructive">Mantenimiento</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full min-w-[800px]">
+      <div className="flex flex-col h-full min-w-[1000px]">
         <Header />
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="flex justify-between items-center mb-8">
@@ -992,7 +1002,10 @@ export default function AssetsPage() {
                         <TableHead>ID</TableHead>
                         <TableHead>Equipo</TableHead>
                         <TableHead>Serial</TableHead>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>Categoría</TableHead>
                         <TableHead>Responsable</TableHead>
+                        <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -1000,9 +1013,12 @@ export default function AssetsPage() {
                       {filteredAssets.map((a) => (
                         <TableRow key={a.id}>
                           <TableCell className="font-bold text-primary">{a.id}</TableCell>
-                          <TableCell>{a.name}</TableCell>
+                          <TableCell className="max-w-[150px] truncate">{a.name}</TableCell>
                           <TableCell className="font-code text-xs">{a.serialNumber}</TableCell>
+                          <TableCell>{a.company}</TableCell>
+                          <TableCell className="text-xs font-medium">{a.category}</TableCell>
                           <TableCell>{a.responsable}</TableCell>
+                          <TableCell>{getStatusBadge(a.status)}</TableCell>
                           <TableCell className="text-right flex justify-end gap-2">
                             <Button
                               variant="ghost"
@@ -1042,7 +1058,7 @@ export default function AssetsPage() {
                       ))}
                       {filteredAssets.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                          <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                             No se encontraron activos.
                           </TableCell>
                         </TableRow>
@@ -1061,6 +1077,8 @@ export default function AssetsPage() {
                       <TableRow>
                         <TableHead>ID</TableHead>
                         <TableHead>Equipo</TableHead>
+                        <TableHead>Empresa</TableHead>
+                        <TableHead>Categoría</TableHead>
                         <TableHead>Fecha Baja</TableHead>
                         <TableHead>Motivo</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
@@ -1071,6 +1089,8 @@ export default function AssetsPage() {
                         <TableRow key={a.id}>
                           <TableCell className="font-bold text-destructive">{a.id}</TableCell>
                           <TableCell>{a.name}</TableCell>
+                          <TableCell>{a.company}</TableCell>
+                          <TableCell className="text-xs font-medium">{a.category}</TableCell>
                           <TableCell>{a.deletionDate}</TableCell>
                           <TableCell>{a.reason}</TableCell>
                           <TableCell className="text-right flex justify-end gap-2">
@@ -1101,7 +1121,7 @@ export default function AssetsPage() {
                       ))}
                       {filteredDeletedAssets.length === 0 && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                          <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                             No hay activos eliminados.
                           </TableCell>
                         </TableRow>
