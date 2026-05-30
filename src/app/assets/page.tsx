@@ -43,6 +43,7 @@ import {
   Info,
   X,
   History,
+  RefreshCcw,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -83,6 +84,7 @@ import { Separator } from '@/components/ui/separator';
 import AssetHistory from '@/components/dashboard/asset-history';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, catalog } from '@/lib/mock-data';
 
 const computerAssetSchema = z.object({
@@ -556,7 +558,6 @@ function AssetForm({
                               ))}
                             </SelectContent>
                           </Select>
-                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Forzado por compatibilidad física.</p>}
                         </FormItem>
                       )}
                     />
@@ -780,12 +781,30 @@ export default function AssetsPage() {
     return list;
   }, [assets, userRole, userName, searchTerm]);
 
+  const filteredDeletedAssets = useMemo(() => {
+    let list = deletedAssets;
+    if (searchTerm) {
+      list = list.filter((a) => Object.values(a).some((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase())));
+    }
+    return list;
+  }, [deletedAssets, searchTerm]);
+
   const handleDeleteAsset = (id: string) => {
     const asset = assets.find((a) => a.id === id);
     if (asset) {
       setAssets(assets.filter((a) => a.id !== id));
       setDeletedAssets([...deletedAssets, { ...asset, deletionDate: format(new Date(), 'yyyy-MM-dd'), reason: 'Baja' }] as any);
       toast({ title: 'Activo Dado de Baja', description: 'El equipo se ha movido a la papelera.' });
+    }
+  };
+
+  const handleRestoreAsset = (id: string) => {
+    const asset = deletedAssets.find((a) => a.id === id);
+    if (asset) {
+      setDeletedAssets(deletedAssets.filter((a) => a.id !== id));
+      const { deletionDate, reason, ...rest } = asset as any;
+      setAssets([...assets, rest]);
+      toast({ title: 'Activo Restaurado', description: 'El equipo ha vuelto al listado principal.' });
     }
   };
 
@@ -796,8 +815,8 @@ export default function AssetsPage() {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold font-headline">Inventario de Activos</h1>
-              <p className="text-muted-foreground">Control y trazabilidad técnica por equipo.</p>
+              <h1 className="text-3xl font-bold font-headline">Gestión de Activos</h1>
+              <p className="text-muted-foreground">Administración del inventario técnico y ciclo de vida.</p>
             </div>
             {userRole !== 'estandar' && (
               <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -846,9 +865,16 @@ export default function AssetsPage() {
             )}
           </div>
 
-          <Card>
-            <CardHeader className="flex flex-row justify-between items-center">
-              <CardTitle>Listado Maestro</CardTitle>
+          <Tabs defaultValue="list" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <TabsList className="bg-muted p-1 rounded-lg">
+                <TabsTrigger value="list" className="flex gap-2">
+                  <Archive className="h-4 w-4" /> Listado Maestro
+                </TabsTrigger>
+                <TabsTrigger value="deleted" className="flex gap-2">
+                  <Trash2 className="h-4 w-4" /> Activos Eliminados
+                </TabsTrigger>
+              </TabsList>
               <div className="relative w-80">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -858,66 +884,137 @@ export default function AssetsPage() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Equipo</TableHead>
-                    <TableHead>Serial</TableHead>
-                    <TableHead>Responsable</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAssets.map((a) => (
-                    <TableRow key={a.id}>
-                      <TableCell className="font-bold text-primary">{a.id}</TableCell>
-                      <TableCell>{a.name}</TableCell>
-                      <TableCell className="font-code text-xs">{a.serialNumber}</TableCell>
-                      <TableCell>{a.responsable}</TableCell>
-                      <TableCell className="text-right flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedAsset(a);
-                            setIsDetailsOpen(true);
-                            setIsAddingHistory(false);
-                            setIsEditing(false);
-                          }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {userRole !== 'estandar' && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive">
-                                <Trash2 className="h-4 w-4" />
+            </div>
+
+            <TabsContent value="list">
+              <Card>
+                <CardContent className="pt-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Equipo</TableHead>
+                        <TableHead>Serial</TableHead>
+                        <TableHead>Responsable</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredAssets.map((a) => (
+                        <TableRow key={a.id}>
+                          <TableCell className="font-bold text-primary">{a.id}</TableCell>
+                          <TableCell>{a.name}</TableCell>
+                          <TableCell className="font-code text-xs">{a.serialNumber}</TableCell>
+                          <TableCell>{a.responsable}</TableCell>
+                          <TableCell className="text-right flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setSelectedAsset(a);
+                                setIsDetailsOpen(true);
+                                setIsAddingHistory(false);
+                                setIsEditing(false);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {userRole !== 'estandar' && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>¿Dar de baja este activo?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Esta acción moverá el equipo {a.id} al registro histórico de bajas.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteAsset(a.id)}>Confirmar Baja</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {filteredAssets.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                            No se encontraron activos.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="deleted">
+              <Card>
+                <CardContent className="pt-6">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Equipo</TableHead>
+                        <TableHead>Fecha Baja</TableHead>
+                        <TableHead>Motivo</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDeletedAssets.map((a: any) => (
+                        <TableRow key={a.id}>
+                          <TableCell className="font-bold text-destructive">{a.id}</TableCell>
+                          <TableCell>{a.name}</TableCell>
+                          <TableCell>{a.deletionDate}</TableCell>
+                          <TableCell>{a.reason}</TableCell>
+                          <TableCell className="text-right flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setSelectedAsset(a);
+                                setIsDetailsOpen(true);
+                                setIsAddingHistory(false);
+                                setIsEditing(false);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {userRole !== 'estandar' && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-primary"
+                                onClick={() => handleRestoreAsset(a.id)}
+                              >
+                                <RefreshCcw className="h-4 w-4" />
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>¿Dar de baja este activo?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta acción moverá el equipo {a.id} al registro histórico de bajas.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteAsset(a.id)}>Confirmar Baja</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {filteredDeletedAssets.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                            No hay activos eliminados.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </main>
 
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
@@ -992,9 +1089,9 @@ export default function AssetsPage() {
                           <Cpu className="h-4 w-4" /> Hardware Técnico
                         </h3>
                         <div className="space-y-8">
-                          <div className="bg-background p-5 rounded-xl border flex flex-col gap-2 text-center md:text-left">
+                          <div className="bg-background p-5 rounded-xl border flex flex-col gap-2">
                             <span className="text-xs font-bold text-muted-foreground uppercase">Procesador</span>
-                            <div className="font-bold flex items-center justify-center md:justify-start gap-3 text-lg text-primary">
+                            <div className="font-bold flex items-center gap-3 text-lg text-primary">
                               <Cpu className="h-5 w-5" />
                               {selectedAsset?.processor}
                             </div>
@@ -1007,7 +1104,7 @@ export default function AssetsPage() {
                             <span className="text-xs font-bold text-muted-foreground uppercase px-2">Memoria RAM</span>
                             <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.rams?.map((r: any, i: number) => (
-                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col items-center md:items-start gap-2">
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
                                   <span className="text-[10px] font-bold text-muted-foreground">MÓDULO {i + 1}</span>
                                   <div className="font-bold text-lg">{r.size}</div>
                                   <div className="text-xs text-primary font-bold uppercase">{r.type}</div>
@@ -1020,7 +1117,7 @@ export default function AssetsPage() {
                             <span className="text-xs font-bold text-muted-foreground uppercase px-2">Almacenamiento</span>
                             <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.storages?.map((s: any, i: number) => (
-                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col items-center md:items-start gap-2">
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
                                   <span className="text-[10px] font-bold text-muted-foreground">UNIDAD {i + 1}</span>
                                   <div className="font-bold text-lg">{s.size}</div>
                                   <div className="text-xs text-accent font-bold uppercase">{s.type}</div>
@@ -1039,24 +1136,24 @@ export default function AssetsPage() {
                         </h3>
                         <div className="grid grid-cols-1 gap-6">
                           <div className="p-5 bg-background rounded-xl border space-y-4">
-                            <div className="flex flex-col gap-1 items-center md:items-start">
+                            <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-muted-foreground uppercase">Sistema Operativo</span>
                               <p className="font-bold text-lg text-primary">{selectedAsset?.os}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
                               <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key Windows</span>
-                              <p className="font-code text-sm break-all font-bold text-center md:text-left">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
+                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
 
                           <div className="p-5 bg-background rounded-xl border space-y-4">
-                            <div className="flex flex-col gap-1 items-center md:items-start">
+                            <div className="flex flex-col gap-1">
                               <span className="text-xs font-bold text-muted-foreground uppercase">Microsoft Office</span>
                               <p className="font-bold text-lg text-primary">{selectedAsset?.officeVersion}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-accent">
                               <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key Office</span>
-                              <p className="font-code text-sm break-all font-bold text-center md:text-left">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
+                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
                         </div>
@@ -1078,7 +1175,6 @@ export default function AssetsPage() {
                           onCancel={() => setIsAddingHistory(false)} 
                           onSaveSuccess={() => {
                             setIsAddingHistory(false);
-                            // Real app would refresh list
                           }} 
                         />
                       )}
