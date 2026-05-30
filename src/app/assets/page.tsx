@@ -261,6 +261,7 @@ function AssetForm({
     control: form.control,
     name: 'rams' as any,
   });
+  
   const { fields: storageFields, append: appendStorage, remove: removeStorage } = useFieldArray({
     control: form.control,
     name: 'storages' as any,
@@ -371,6 +372,7 @@ function AssetForm({
           </div>
 
           <Separator />
+          
           <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-primary">
             <Laptop className="h-4 w-4" /> Especificaciones de Hardware
           </div>
@@ -431,11 +433,11 @@ function AssetForm({
           {isComputer && (
             <div className="space-y-8">
               {/* PROCESADOR VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-4">
+              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                  <Cpu className="h-4 w-4" /> Procesador Principal
+                  <Cpu className="h-4 w-4" /> Unidad de Procesamiento (CPU)
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   <FormField
                     control={form.control}
                     name="processor"
@@ -464,7 +466,7 @@ function AssetForm({
                     name="processorGen"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Generación del Procesador</FormLabel>
+                        <FormLabel>Generación</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value as string}>
                           <FormControl>
                             <SelectTrigger>
@@ -496,7 +498,7 @@ function AssetForm({
                   </Button>
                 </div>
                 {ramFields.map((item, index) => (
-                  <div key={item.id} className="flex flex-col gap-4 border-b pb-6 last:border-0 last:pb-0 relative">
+                  <div key={item.id} className="flex flex-col gap-6 border-b pb-6 last:border-0 last:pb-0 relative">
                     <FormField
                       control={form.control}
                       name={`rams.${index}.size` as any}
@@ -506,7 +508,7 @@ function AssetForm({
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue placeholder="Ej: 8 GB" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -538,7 +540,7 @@ function AssetForm({
                           >
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue placeholder="Ej: DDR4" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -549,7 +551,7 @@ function AssetForm({
                               ))}
                             </SelectContent>
                           </Select>
-                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Debe coincidir con el primer módulo.</p>}
+                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Bloqueado para coincidir con el primer módulo.</p>}
                         </FormItem>
                       )}
                     />
@@ -566,14 +568,14 @@ function AssetForm({
               <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                    <HardDrive className="h-4 w-4" /> Almacenamiento
+                    <HardDrive className="h-4 w-4" /> Unidades de Disco
                   </div>
                   <Button type="button" variant="outline" size="sm" onClick={() => appendStorage({ size: '', type: '' })}>
                     <Plus className="h-4 w-4 mr-2" /> Añadir Disco
                   </Button>
                 </div>
                 {storageFields.map((item, index) => (
-                  <div key={item.id} className="flex flex-col gap-4 border-b pb-6 last:border-0 last:pb-0 relative">
+                  <div key={item.id} className="flex flex-col gap-6 border-b pb-6 last:border-0 last:pb-0 relative">
                     <FormField
                       control={form.control}
                       name={`storages.${index}.size` as any}
@@ -583,7 +585,7 @@ function AssetForm({
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue placeholder="Ej: 512 GB" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -606,7 +608,7 @@ function AssetForm({
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue placeholder="Ej: M.2 NVMe" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -630,6 +632,7 @@ function AssetForm({
               </div>
 
               <Separator />
+              
               <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-primary">
                 <Network className="h-4 w-4" /> Software & Red
               </div>
@@ -641,24 +644,24 @@ function AssetForm({
                   <FormItem>
                     <FormLabel>Hostname (Nombre en Red)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} placeholder="Ej: PC-TEC-01" />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
               {/* SO VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-4">
+              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
                   <ShieldCheck className="h-4 w-4" /> Sistema Operativo
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   <FormField
                     control={form.control}
                     name="os"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sistema Operativo</FormLabel>
+                        <FormLabel>Versión Sistema Operativo</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value as string}>
                           <FormControl>
                             <SelectTrigger>
@@ -691,11 +694,11 @@ function AssetForm({
               </div>
 
               {/* OFFICE VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-4">
+              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                  <FileText className="h-4 w-4" /> Paquete Office
+                  <FileText className="h-4 w-4" /> Paquete Microsoft Office
                 </div>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   <FormField
                     control={form.control}
                     name="officeVersion"
