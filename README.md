@@ -5,41 +5,35 @@ Este es un sistema profesional diseñado para la gestión, seguimiento y manteni
 ## 🚀 Características Principales
 
 - **Dashboard Administrativo**: Resumen en tiempo real de activos, usuarios y mantenimientos próximos.
-- **Gestión de Inventario**: Registro detallado de hardware con soporte para múltiples módulos de RAM y unidades de disco.
+- **Gestión de Inventario Dinámico**: Registro detallado de hardware con soporte para múltiples módulos de RAM (con bloqueo de compatibilidad) y múltiples unidades de disco.
+- **Catálogo Técnico Gestionable**: Módulo para que el administrador defina marcas, modelos, procesadores y componentes disponibles en el sistema.
 - **Hoja de Vida Técnica**: Trazabilidad completa de mantenimientos, incidentes e instalaciones por equipo.
-- **Catálogo Dinámico**: Gestión centralizada de marcas, modelos, procesadores y componentes.
-- **Control de Acceso (RBAC)**: Roles de Administrador, Técnico y Estándar con permisos específicos.
-- **Generación de Reportes**: Exportación de hojas de vida (Simulado).
+- **Control de Acceso (RBAC)**: Roles de Administrador, Técnico y Estándar con permisos específicos y vistas personalizadas.
+- **Validación Robusta**: Implementación de esquemas de validación con Zod para asegurar la integridad de los datos técnicos.
 
 ## 🛠️ Tecnologías Utilizadas
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
 - **Lenguaje**: TypeScript
 - **Estilos**: Tailwind CSS + ShadCN UI
 - **Validación**: Zod
 - **Iconos**: Lucide React
 - **Gráficos**: Recharts
+- **Gestión de Formularios**: React Hook Form
 
-## 📦 Instalación y Desarrollo
+## 📦 Estructura del Proyecto
 
-1. Instalar dependencias:
-   ```bash
-   npm install
-   ```
+- `src/app`: Rutas y páginas principales del sistema.
+- `src/components`: Componentes atómicos y de interfaz de usuario.
+- `src/lib`: Lógica de negocio, esquemas de validación y base de datos simulada (Mock DB).
+- `docs/`: Archivos de documentación técnica para la tesis.
 
-2. Iniciar el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
+## 📄 Documentación Técnica
 
-3. Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
-
-## 📄 Documentación
-
-Consulta los archivos en la raíz para más detalles técnicos:
-- `DOCUMENTACION.md`: Arquitectura y Modelo de Datos.
-- `DIAGRAMAS.md`: Diagramas UML y flujos de procesos.
-- `MANUAL.md`: Guía de uso por perfiles.
+Para la revisión de la tesis, consulte los siguientes archivos en la raíz:
+- `DOCUMENTACION.md`: Arquitectura, capas del sistema y modelo relacional de datos.
+- `DIAGRAMAS.md`: Diagramas UML de clases y diagramas de secuencia de procesos.
+- `MANUAL.md`: Guía de usuario detallada por perfiles.
 
 ---
-Desarrollado con fines académicos.
+**Desarrollado con fines académicos para el Proyecto de Grado.**
