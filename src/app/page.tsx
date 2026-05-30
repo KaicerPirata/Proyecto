@@ -11,7 +11,6 @@ export default function HomePage() {
   useEffect(() => {
     setIsClient(true);
     
-    // Usamos un pequeño delay para asegurar que la hidratación esté completa
     const timeout = setTimeout(() => {
       const loggedIn = localStorage.getItem('isAuthenticated');
       const userRole = localStorage.getItem('userRole');

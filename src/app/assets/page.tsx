@@ -285,7 +285,7 @@ function AssetForm({
       )}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <FormField
               control={form.control}
               name="responsable"
@@ -323,7 +323,7 @@ function AssetForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <FormField
               control={form.control}
               name="serialNumber"
@@ -379,7 +379,7 @@ function AssetForm({
             <Laptop className="h-4 w-4" /> Especificaciones de Hardware
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <FormField
               control={form.control}
               name="brand"
@@ -433,8 +433,8 @@ function AssetForm({
           </div>
 
           {isComputer && (
-            <div className="space-y-12">
-              <div className="space-y-4">
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 gap-6">
                 <FormField
                   control={form.control}
                   name="processor"
@@ -493,7 +493,7 @@ function AssetForm({
                   </Button>
                 </div>
                 {ramFields.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-1 gap-4 p-6 border rounded-xl bg-muted/20 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-xl bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`rams.${index}.size`}
@@ -551,7 +551,7 @@ function AssetForm({
                       )}
                     />
                     {ramFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-3 top-3 text-destructive" onClick={() => removeRam(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeRam(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -569,7 +569,7 @@ function AssetForm({
                   </Button>
                 </div>
                 {storageFields.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-1 gap-4 p-6 border rounded-xl bg-muted/20 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-xl bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`storages.${index}.size`}
@@ -617,7 +617,7 @@ function AssetForm({
                       )}
                     />
                     {storageFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-3 top-3 text-destructive" onClick={() => removeStorage(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeStorage(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -643,7 +643,7 @@ function AssetForm({
                 )}
               />
 
-              <div className="space-y-12">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-4">
                   <FormField
                     control={form.control}
@@ -719,21 +719,6 @@ function AssetForm({
                 </div>
               </div>
             </div>
-          )}
-
-          {!isComputer && (
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notas / Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea className="min-h-[120px]" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
           )}
 
           <Button type="submit" className="w-full py-6 text-lg font-bold">
@@ -816,7 +801,7 @@ export default function AssetsPage() {
                     <DialogTitle className="text-2xl font-headline">Registrar Nuevo Activo</DialogTitle>
                   </DialogHeader>
                   {createStep === 0 ? (
-                    <div className="grid grid-cols-3 gap-6 py-12">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-12">
                       {[
                         { type: 'Equipo de cómputo', icon: Laptop, label: 'Computador' },
                         { type: 'Monitor', icon: Monitor, label: 'Monitor' },
@@ -865,68 +850,60 @@ export default function AssetsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="active">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="active">Activos Operativos</TabsTrigger>
-                  <TabsTrigger value="deleted">Histórico de Bajas</TabsTrigger>
-                </TabsList>
-                <TabsContent value="active">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Equipo</TableHead>
-                        <TableHead>Serial</TableHead>
-                        <TableHead>Responsable</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredAssets.map((a) => (
-                        <TableRow key={a.id}>
-                          <TableCell className="font-bold text-primary">{a.id}</TableCell>
-                          <TableCell>{a.name}</TableCell>
-                          <TableCell className="font-code text-xs">{a.serialNumber}</TableCell>
-                          <TableCell>{a.responsable}</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setSelectedAsset(a);
-                                setIsDetailsOpen(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {userRole !== 'estandar' && (
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>¿Dar de baja este activo?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Esta acción moverá el equipo {a.id} al registro histórico de bajas.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDeleteAsset(a.id)}>Confirmar Baja</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TabsContent>
-              </Tabs>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Equipo</TableHead>
+                    <TableHead>Serial</TableHead>
+                    <TableHead>Responsable</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAssets.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-bold text-primary">{a.id}</TableCell>
+                      <TableCell>{a.name}</TableCell>
+                      <TableCell className="font-code text-xs">{a.serialNumber}</TableCell>
+                      <TableCell>{a.responsable}</TableCell>
+                      <TableCell className="text-right flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedAsset(a);
+                            setIsDetailsOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {userRole !== 'estandar' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Dar de baja este activo?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción moverá el equipo {a.id} al registro histórico de bajas.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteAsset(a.id)}>Confirmar Baja</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </main>
@@ -934,18 +911,18 @@ export default function AssetsPage() {
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <div className="flex justify-between items-center border-b pb-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
                 <DialogTitle className="text-2xl font-headline flex items-center gap-3">
                   <FileText className="h-6 w-6 text-primary" />
-                  Hoja de Vida Técnica: {selectedAsset?.id}
+                  Hoja de Vida: {selectedAsset?.id}
                 </DialogTitle>
                 <div className="flex gap-2">
                   <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" /> Descargar PDF
+                    <Download className="h-4 w-4 mr-2" /> PDF
                   </Button>
                   {userRole !== 'estandar' && !isEditing && (
                     <Button onClick={() => setIsEditing(true)}>
-                      <Pencil className="h-4 w-4 mr-2" /> Editar Equipo
+                      <Pencil className="h-4 w-4 mr-2" /> Editar
                     </Button>
                   )}
                 </div>
@@ -964,77 +941,77 @@ export default function AssetsPage() {
                 />
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 space-y-6">
+                  <div className="lg:col-span-2 space-y-8">
                     <Card className="bg-muted/30 p-6 border-none shadow-none">
-                      <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                        <Info className="h-4 w-4" /> Información General
+                      <h3 className="text-sm font-bold text-primary uppercase mb-6 flex items-center gap-2">
+                        <Info className="h-4 w-4" /> Datos del Equipo
                       </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Responsable</span>
-                          <span className="font-bold">{selectedAsset?.responsable}</span>
+                      <div className="grid grid-cols-1 gap-6 text-sm">
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Responsable</span>
+                          <span className="font-bold text-base">{selectedAsset?.responsable}</span>
                         </div>
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">S/N Serial</span>
-                          <span className="font-code text-primary">{selectedAsset?.serialNumber}</span>
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">S/N Serial</span>
+                          <span className="font-code text-primary font-bold">{selectedAsset?.serialNumber}</span>
                         </div>
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Hostname (Red)</span>
-                          <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
-                        </div>
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Marca / Modelo</span>
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Marca / Modelo</span>
                           <span className="font-bold">{selectedAsset?.brand} {selectedAsset?.model}</span>
                         </div>
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Nro Factura</span>
-                          <span>{selectedAsset?.invoiceNumber || 'N/A'}</span>
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Hostname</span>
+                          <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
                         </div>
-                        <div className="flex flex-col border-b pb-2">
-                          <span className="text-xs text-muted-foreground uppercase">Fecha Compra</span>
-                          <span>{selectedAsset?.purchaseDate}</span>
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Factura</span>
+                          <span className="font-bold">{selectedAsset?.invoiceNumber || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col border-b pb-3">
+                          <span className="text-xs text-muted-foreground uppercase font-semibold">Fecha Compra</span>
+                          <span className="font-bold">{selectedAsset?.purchaseDate}</span>
                         </div>
                       </div>
                     </Card>
 
-                    {(selectedAsset?.category === 'Equipo de cómputo' || selectedAsset?.processor) && (
+                    {(selectedAsset?.category === 'Equipo de cómputo') && (
                       <Card className="bg-muted/30 p-6 border-none shadow-none">
-                        <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                          <Cpu className="h-4 w-4" /> Configuración de Hardware
+                        <h3 className="text-sm font-bold text-primary uppercase mb-6 flex items-center gap-2">
+                          <Cpu className="h-4 w-4" /> Hardware Técnico
                         </h3>
-                        <div className="space-y-6">
-                          <div className="bg-background p-4 rounded-xl border flex flex-col gap-1">
-                            <span className="text-xs font-bold text-muted-foreground uppercase">Procesador e Hilo</span>
-                            <div className="font-bold flex items-center gap-2 text-lg">
-                              <Cpu className="h-5 w-5 text-primary" />
+                        <div className="space-y-8">
+                          <div className="bg-background p-5 rounded-xl border flex flex-col gap-2">
+                            <span className="text-xs font-bold text-muted-foreground uppercase">Procesador</span>
+                            <div className="font-bold flex items-center gap-3 text-lg text-primary">
+                              <Cpu className="h-5 w-5" />
                               {selectedAsset?.processor}
                             </div>
-                            <div className="text-sm text-primary font-medium pl-7">
-                              Generación: {selectedAsset?.processorGen || 'Desconocida'}
+                            <div className="text-sm font-medium pl-8 text-muted-foreground">
+                              Gen: {selectedAsset?.processorGen || 'Desconocida'}
                             </div>
                           </div>
 
-                          <div className="space-y-3">
-                            <span className="text-xs font-bold text-muted-foreground uppercase block">Módulos de Memoria RAM</span>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-4">
+                            <span className="text-xs font-bold text-muted-foreground uppercase">Memoria RAM</span>
+                            <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.rams?.map((r: any, i: number) => (
-                                <div key={i} className="bg-background p-4 rounded-xl border flex flex-col gap-1">
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
                                   <span className="text-[10px] font-bold text-muted-foreground">MOD {i + 1}</span>
-                                  <div className="font-bold text-base">{r.size}</div>
-                                  <div className="text-xs text-primary font-medium">{r.type}</div>
+                                  <div className="font-bold text-lg">{r.size}</div>
+                                  <div className="text-xs text-primary font-bold">{r.type}</div>
                                 </div>
                               ))}
                             </div>
                           </div>
 
-                          <div className="space-y-3">
-                            <span className="text-xs font-bold text-muted-foreground uppercase block">Unidades de Almacenamiento</span>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-4">
+                            <span className="text-xs font-bold text-muted-foreground uppercase">Almacenamiento</span>
+                            <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.storages?.map((s: any, i: number) => (
-                                <div key={i} className="bg-background p-4 rounded-xl border flex flex-col gap-1">
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
                                   <span className="text-[10px] font-bold text-muted-foreground">DISCO {i + 1}</span>
-                                  <div className="font-bold text-base">{s.size}</div>
-                                  <div className="text-xs text-accent font-medium">{s.type}</div>
+                                  <div className="font-bold text-lg">{s.size}</div>
+                                  <div className="text-xs text-accent font-bold">{s.type}</div>
                                 </div>
                               ))}
                             </div>
@@ -1045,62 +1022,33 @@ export default function AssetsPage() {
 
                     {(userRole === 'admin' || userRole === 'tecnico') && (selectedAsset?.category === 'Equipo de cómputo') && (
                       <Card className="bg-muted/30 p-6 border-none shadow-none">
-                        <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4" /> Software & Licenciamiento
+                        <h3 className="text-sm font-bold text-primary uppercase mb-6 flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" /> Software & Licencias
                         </h3>
                         <div className="grid grid-cols-1 gap-6">
-                          <div className="p-4 bg-background rounded-xl border space-y-3">
+                          <div className="p-5 bg-background rounded-xl border space-y-4">
                             <div className="flex flex-col gap-1">
-                              <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
-                                <Monitor className="h-3 w-3" /> Sistema Operativo
-                              </span>
-                              <p className="font-bold text-lg">{selectedAsset?.os}</p>
+                              <span className="text-xs font-bold text-muted-foreground uppercase">Sistema Operativo</span>
+                              <p className="font-bold text-lg text-primary">{selectedAsset?.os}</p>
                             </div>
-                            <div className="p-3 bg-muted/50 rounded-md border-l-4 border-primary">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (SO)</span>
-                              <p className="font-code text-sm break-all">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
+                            <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key SO</span>
+                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
 
-                          <div className="p-4 bg-background rounded-xl border space-y-3">
+                          <div className="p-5 bg-background rounded-xl border space-y-4">
                             <div className="flex flex-col gap-1">
-                              <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
-                                <FileText className="h-3 w-3" /> Microsoft Office
-                              </span>
-                              <p className="font-bold text-lg">{selectedAsset?.officeVersion}</p>
+                              <span className="text-xs font-bold text-muted-foreground uppercase">Microsoft Office</span>
+                              <p className="font-bold text-lg text-primary">{selectedAsset?.officeVersion}</p>
                             </div>
-                            <div className="p-3 bg-muted/50 rounded-md border-l-4 border-accent">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Office)</span>
-                              <p className="font-code text-sm break-all">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
+                            <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-accent">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key Office</span>
+                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
                         </div>
                       </Card>
-                    )}
-
-                    <Separator />
-                    
-                    {userRole !== 'estandar' && (
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-bold text-sm">Registro de Intervenciones</h4>
-                          <Button 
-                            variant={isAddingHistory ? 'ghost' : 'default'} 
-                            size="sm" 
-                            onClick={() => setIsAddingHistory(!isAddingHistory)}
-                          >
-                            {isAddingHistory ? 'Cancelar' : 'Añadir Entrada'}
-                          </Button>
-                        </div>
-                        {isAddingHistory && (
-                          <div className="border p-6 rounded-xl bg-card shadow-sm">
-                            <AddHistoryForm 
-                              assetId={selectedAsset?.id} 
-                              onSaveSuccess={() => setIsAddingHistory(false)} 
-                            />
-                          </div>
-                        )}
-                      </div>
                     )}
                   </div>
 
