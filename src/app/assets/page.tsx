@@ -768,10 +768,10 @@ export default function AssetsPage() {
   const [isAddingHistory, setIsAddingHistory] = useState(false);
 
   const [advancedFilters, setAdvancedFilters] = useState({
-    responsable: '',
-    company: '',
-    category: '',
-    status: '',
+    responsable: 'all',
+    company: 'all',
+    category: 'all',
+    status: 'all',
   });
 
   useEffect(() => {
@@ -797,11 +797,11 @@ export default function AssetsPage() {
       list = list.filter((a) => Object.values(a).some((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase())));
     }
 
-    // Apply advanced filters
-    if (advancedFilters.responsable) list = list.filter(a => a.responsable === advancedFilters.responsable);
-    if (advancedFilters.company) list = list.filter(a => a.company === advancedFilters.company);
-    if (advancedFilters.category) list = list.filter(a => a.category === advancedFilters.category);
-    if (advancedFilters.status) list = list.filter(a => a.status === advancedFilters.status);
+    // Apply advanced filters (handling 'all' as no filter)
+    if (advancedFilters.responsable !== 'all') list = list.filter(a => a.responsable === advancedFilters.responsable);
+    if (advancedFilters.company !== 'all') list = list.filter(a => a.company === advancedFilters.company);
+    if (advancedFilters.category !== 'all') list = list.filter(a => a.category === advancedFilters.category);
+    if (advancedFilters.status !== 'all') list = list.filter(a => a.status === advancedFilters.status);
 
     return list;
   }, [assets, userRole, userName, searchTerm, advancedFilters]);
@@ -930,7 +930,7 @@ export default function AssetsPage() {
                                 <SelectValue placeholder="Todos" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Todos</SelectItem>
+                                <SelectItem value="all">Todos</SelectItem>
                                 {users.map(u => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
@@ -942,7 +942,7 @@ export default function AssetsPage() {
                                 <SelectValue placeholder="Todas" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Todas</SelectItem>
+                                <SelectItem value="all">Todas</SelectItem>
                                 {companies.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                               </SelectContent>
                             </Select>
@@ -954,7 +954,7 @@ export default function AssetsPage() {
                                 <SelectValue placeholder="Todas" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Todas</SelectItem>
+                                <SelectItem value="all">Todas</SelectItem>
                                 <SelectItem value="Equipo de cómputo">Computador</SelectItem>
                                 <SelectItem value="Monitor">Monitor</SelectItem>
                                 <SelectItem value="UPS">UPS</SelectItem>
@@ -968,7 +968,7 @@ export default function AssetsPage() {
                                 <SelectValue placeholder="Todos" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Todos</SelectItem>
+                                <SelectItem value="all">Todos</SelectItem>
                                 <SelectItem value="Asignado">Asignado</SelectItem>
                                 <SelectItem value="En Almacén">En Almacén</SelectItem>
                                 <SelectItem value="Mantenimiento">Mantenimiento</SelectItem>
@@ -977,7 +977,7 @@ export default function AssetsPage() {
                           </div>
                         </div>
                         <div className="flex justify-end mt-4">
-                           <Button variant="ghost" size="sm" onClick={() => setAdvancedFilters({ responsable: '', company: '', category: '', status: '' })}>
+                           <Button variant="ghost" size="sm" onClick={() => setAdvancedFilters({ responsable: 'all', company: 'all', category: 'all', status: 'all' })}>
                              Limpiar Filtros
                            </Button>
                         </div>
