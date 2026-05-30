@@ -1,5 +1,4 @@
-
-import { addMonths, subDays } from 'date-fns';
+import { addMonths } from 'date-fns';
 
 export const catalog = {
   pcModels: ['Latitude 5420', 'ThinkPad T14', 'Elitebook 840 G8', 'Vostro 3400', 'OptiPlex 7090'],
@@ -36,7 +35,7 @@ export const assets = [
     storages: [{ size: '1 TB', type: 'SSD' }],
     os: 'Windows 11 Pro',
     osKey: 'XXXXX-XXXXX-XXXXX-XXXXX-ABCDE',
-    officeVersion: 'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021',
+    officeVersion: 'OFFICE 365',
     officeKey: 'YYYYY-YYYYY-YYYYY-YYYYY-FGHIJ',
     networkName: 'PC-TEC-01'
   },
