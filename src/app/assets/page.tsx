@@ -793,12 +793,10 @@ export default function AssetsPage() {
   const filteredAssets = useMemo(() => {
     let list = userRole === 'estandar' ? assets.filter((a) => a.responsable === userName) : assets;
     
-    // Apply search term
     if (searchTerm) {
       list = list.filter((a) => Object.values(a).some((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase())));
     }
 
-    // Apply advanced filters (handling 'all' as no filter)
     if (advancedFilters.responsable !== 'all') list = list.filter(a => a.responsable === advancedFilters.responsable);
     if (advancedFilters.company !== 'all') list = list.filter(a => a.company === advancedFilters.company);
     if (advancedFilters.category !== 'all') list = list.filter(a => a.category === advancedFilters.category);
