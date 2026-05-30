@@ -41,6 +41,8 @@ import {
   ShieldCheck,
   FileText,
   Info,
+  History,
+  X,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -128,7 +130,7 @@ const simpleAssetSchema = z.object({
   description: z.string().optional(),
 });
 
-function AddHistoryForm({ assetId, onSaveSuccess }: { assetId: string; onSaveSuccess: () => void }) {
+function AddHistoryForm({ assetId, onSaveSuccess, onCancel }: { assetId: string; onSaveSuccess: () => void; onCancel: () => void }) {
   const { toast } = useToast();
   const form = useForm({
     defaultValues: { author: '', description: '', type: 'Incidente' as const },
@@ -137,74 +139,83 @@ function AddHistoryForm({ assetId, onSaveSuccess }: { assetId: string; onSaveSuc
   const technicians = users.filter((u) => u.department === 'Tecnología');
 
   function onSubmit(data: any) {
-    toast({ title: 'Historial Añadido', description: 'El registro ha sido guardado.' });
+    toast({ title: 'Registro Exitoso', description: 'El historial ha sido actualizado.' });
     onSaveSuccess();
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="author"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Técnico Responsable</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un técnico" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {technicians.map((t) => (
-                    <SelectItem key={t.id} value={t.name}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Tipo de Registro</FormLabel>
-              <FormControl>
-                <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Mantenimiento" id="r1" />
-                    <Label htmlFor="r1">Mantenimiento</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Incidente" id="r2" />
-                    <Label htmlFor="r2">Incidente</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción del Trabajo</FormLabel>
-              <FormControl>
-                <Textarea className="min-h-[150px]" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">
-          Guardar Registro
-        </Button>
-      </form>
-    </Form>
+    <Card className="border-primary/20 bg-primary/5">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-bold uppercase tracking-wider">Nuevo Registro de Historial</CardTitle>
+        <Button variant="ghost" size="icon" onClick={onCancel}><X className="h-4 w-4" /></Button>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="author"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Técnico Responsable</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un técnico" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {technicians.map((t) => (
+                        <SelectItem key={t.id} value={t.name}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Tipo de Registro</FormLabel>
+                  <FormControl>
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Mantenimiento" id="r1" />
+                        <Label htmlFor="r1">Mantenimiento</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Incidente" id="r2" />
+                        <Label htmlFor="r2">Incidente</Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descripción del Trabajo</FormLabel>
+                  <FormControl>
+                    <Textarea className="min-h-[100px]" placeholder="Detalla el mantenimiento o incidente..." {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1">Guardar Registro</Button>
+              <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -874,6 +885,8 @@ export default function AssetsPage() {
                           onClick={() => {
                             setSelectedAsset(a);
                             setIsDetailsOpen(true);
+                            setIsAddingHistory(false);
+                            setIsEditing(false);
                           }}
                         >
                           <Eye className="h-4 w-4" />
@@ -1052,7 +1065,23 @@ export default function AssetsPage() {
                     )}
                   </div>
 
-                  <div className="lg:col-span-1">
+                  <div className="lg:col-span-1 space-y-6">
+                    <div className="flex flex-col gap-4">
+                      {!isAddingHistory && userRole !== 'estandar' && (
+                        <Button className="w-full" onClick={() => setIsAddingHistory(true)}>
+                          <Plus className="h-4 w-4 mr-2" /> Añadir Registro
+                        </Button>
+                      )}
+                      
+                      {isAddingHistory && (
+                        <AddHistoryForm 
+                          assetId={selectedAsset?.id} 
+                          onCancel={() => setIsAddingHistory(false)} 
+                          onSaveSuccess={() => setIsAddingHistory(false)} 
+                        />
+                      )}
+                    </div>
+                    
                     <AssetHistory assetId={selectedAsset?.id} />
                   </div>
                 </div>
