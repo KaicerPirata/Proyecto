@@ -42,6 +42,7 @@ import {
   FileText,
   Info,
   X,
+  History,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -991,38 +992,38 @@ export default function AssetsPage() {
                           <Cpu className="h-4 w-4" /> Hardware Técnico
                         </h3>
                         <div className="space-y-8">
-                          <div className="bg-background p-5 rounded-xl border flex flex-col gap-2">
+                          <div className="bg-background p-5 rounded-xl border flex flex-col gap-2 text-center md:text-left">
                             <span className="text-xs font-bold text-muted-foreground uppercase">Procesador</span>
-                            <div className="font-bold flex items-center gap-3 text-lg text-primary">
+                            <div className="font-bold flex items-center justify-center md:justify-start gap-3 text-lg text-primary">
                               <Cpu className="h-5 w-5" />
                               {selectedAsset?.processor}
                             </div>
-                            <div className="text-sm font-medium pl-8 text-muted-foreground">
-                              Gen: {selectedAsset?.processorGen || 'Desconocida'}
+                            <div className="text-sm font-medium text-muted-foreground">
+                              Generación: {selectedAsset?.processorGen || 'Desconocida'}
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <span className="text-xs font-bold text-muted-foreground uppercase">Memoria RAM</span>
+                            <span className="text-xs font-bold text-muted-foreground uppercase px-2">Memoria RAM</span>
                             <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.rams?.map((r: any, i: number) => (
-                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
-                                  <span className="text-[10px] font-bold text-muted-foreground">MOD {i + 1}</span>
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col items-center md:items-start gap-2">
+                                  <span className="text-[10px] font-bold text-muted-foreground">MÓDULO {i + 1}</span>
                                   <div className="font-bold text-lg">{r.size}</div>
-                                  <div className="text-xs text-primary font-bold">{r.type}</div>
+                                  <div className="text-xs text-primary font-bold uppercase">{r.type}</div>
                                 </div>
                               ))}
                             </div>
                           </div>
 
                           <div className="space-y-4">
-                            <span className="text-xs font-bold text-muted-foreground uppercase">Almacenamiento</span>
+                            <span className="text-xs font-bold text-muted-foreground uppercase px-2">Almacenamiento</span>
                             <div className="grid grid-cols-1 gap-4">
                               {selectedAsset?.storages?.map((s: any, i: number) => (
-                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col gap-2">
-                                  <span className="text-[10px] font-bold text-muted-foreground">DISCO {i + 1}</span>
+                                <div key={i} className="bg-background p-5 rounded-xl border flex flex-col items-center md:items-start gap-2">
+                                  <span className="text-[10px] font-bold text-muted-foreground">UNIDAD {i + 1}</span>
                                   <div className="font-bold text-lg">{s.size}</div>
-                                  <div className="text-xs text-accent font-bold">{s.type}</div>
+                                  <div className="text-xs text-accent font-bold uppercase">{s.type}</div>
                                 </div>
                               ))}
                             </div>
@@ -1038,24 +1039,24 @@ export default function AssetsPage() {
                         </h3>
                         <div className="grid grid-cols-1 gap-6">
                           <div className="p-5 bg-background rounded-xl border space-y-4">
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 items-center md:items-start">
                               <span className="text-xs font-bold text-muted-foreground uppercase">Sistema Operativo</span>
                               <p className="font-bold text-lg text-primary">{selectedAsset?.os}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key SO</span>
-                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key Windows</span>
+                              <p className="font-code text-sm break-all font-bold text-center md:text-left">{selectedAsset?.osKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
 
                           <div className="p-5 bg-background rounded-xl border space-y-4">
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 items-center md:items-start">
                               <span className="text-xs font-bold text-muted-foreground uppercase">Microsoft Office</span>
                               <p className="font-bold text-lg text-primary">{selectedAsset?.officeVersion}</p>
                             </div>
                             <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-accent">
                               <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Key Office</span>
-                              <p className="font-code text-sm break-all font-bold">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
+                              <p className="font-code text-sm break-all font-bold text-center md:text-left">{selectedAsset?.officeKey || 'NO REGISTRADA'}</p>
                             </div>
                           </div>
                         </div>
@@ -1066,7 +1067,7 @@ export default function AssetsPage() {
                   <div className="lg:col-span-1 space-y-6">
                     <div className="flex flex-col gap-4">
                       {!isAddingHistory && userRole !== 'estandar' && (
-                        <Button className="w-full" onClick={() => setIsAddingHistory(true)}>
+                        <Button className="w-full h-12 font-bold shadow-md" onClick={() => setIsAddingHistory(true)}>
                           <Plus className="h-4 w-4 mr-2" /> Añadir Registro
                         </Button>
                       )}
@@ -1075,7 +1076,10 @@ export default function AssetsPage() {
                         <AddHistoryForm 
                           assetId={selectedAsset?.id} 
                           onCancel={() => setIsAddingHistory(false)} 
-                          onSaveSuccess={() => setIsAddingHistory(false)} 
+                          onSaveSuccess={() => {
+                            setIsAddingHistory(false);
+                            // Real app would refresh list
+                          }} 
                         />
                       )}
                     </div>
