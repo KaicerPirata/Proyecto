@@ -14,7 +14,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2, Network, Cpu, HardDrive } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, Trash2, ArrowLeft, Monitor, Zap, Laptop, Eye, Download, Search, Pencil, Undo2, Network, Cpu, HardDrive, Plus, X } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -71,10 +71,14 @@ const computerAssetSchema = z.object({
   model: z.string().min(1, 'El modelo es requerido.'),
   processor: z.string().min(1, 'El procesador es requerido.'),
   processorGen: z.string().optional(),
-  ram: z.string().min(1, 'La memoria RAM es requerida.'),
-  ramType: z.string().optional(),
-  storage: z.string().min(1, 'El disco duro es requerido.'),
-  storageType: z.string().optional(),
+  rams: z.array(z.object({
+    size: z.string().min(1, 'Requerido'),
+    type: z.string().min(1, 'Requerido'),
+  })).min(1, 'Al menos un módulo RAM es requerido'),
+  storages: z.array(z.object({
+    size: z.string().min(1, 'Requerido'),
+    type: z.string().min(1, 'Requerido'),
+  })).min(1, 'Al menos un disco es requerido'),
   os: z.enum(['Windows 10 Pro', 'Windows 11 Pro', 'Linux', 'macOS']),
   osKey: z.string().optional(),
   officeVersion: z.enum([
@@ -228,8 +232,10 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
       purchaseDate: new Date(assetToEdit.purchaseDate)
   } : (isComputer ? {
       responsable: '', serialNumber: '', invoiceNumber: '', assetName: '',
-      networkName: '', brand: '', model: '', processor: '', processorGen: '', ram: '', ramType: '',
-      storage: '', storageType: '', officeKey: '', osKey: '', equipmentType: 'portatil' as const,
+      networkName: '', brand: '', model: '', processor: '', processorGen: '',
+      rams: [{ size: '', type: '' }],
+      storages: [{ size: '', type: '' }],
+      officeKey: '', osKey: '', equipmentType: 'portatil' as const,
       os: 'Windows 11 Pro' as const, officeVersion: 'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021' as const,
   } : {
       responsable: '', assetName: '', serialNumber: '', invoiceNumber: '',
@@ -238,8 +244,21 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues,
+    defaultValues: defaultValues as any,
   });
+
+  const { fields: ramFields, append: appendRam, remove: removeRam } = useFieldArray({
+    control: form.control,
+    name: "rams" as any
+  });
+
+  const { fields: storageFields, append: appendStorage, remove: removeStorage } = useFieldArray({
+    control: form.control,
+    name: "storages" as any
+  });
+
+  // Watch for the first RAM type to lock the others
+  const firstRamType = form.watch("rams.0.type" as any);
 
   function onSubmit(data: z.infer<typeof schema>) {
       toast({
@@ -334,7 +353,7 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         <PopoverTrigger asChild>
                         <FormControl>
                             <Button variant={'outline'} className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                                {field.value ? format(field.value, 'PPP') : <span>Selecciona una fecha</span>}
+                                {field.value ? format(field.value as Date, 'PPP') : <span>Selecciona una fecha</span>}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                         </FormControl>
@@ -464,74 +483,122 @@ function AssetForm({ assetType, onSaveSuccess, onBack, assetToEdit }: { assetTyp
                         />
                     </div>
 
-                    {/* RAM Group */}
-                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
-                        <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
-                            <Cpu className="h-3 w-3" /> Memoria RAM
+                    {/* RAM Multi-Module Section */}
+                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20 md:col-span-2">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
+                                <Cpu className="h-3 w-3" /> Memoria RAM (Módulos)
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendRam({ size: '', type: firstRamType || '' })}>
+                                <Plus className="h-3 w-3 mr-1" /> Añadir Módulo
+                            </Button>
                         </div>
-                        <FormField
-                        control={form.control}
-                        name="ram"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Capacidad RAM</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="RAM" /></SelectTrigger></FormControl>
-                                <SelectContent>{catalog.ramSizes.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="ramType"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Tecnología (DDR)</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Tipo (DDR)" /></SelectTrigger></FormControl>
-                                <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+                        
+                        <div className="space-y-4">
+                            {ramFields.map((field, index) => (
+                                <div key={field.id} className="flex gap-4 items-end border-b pb-4 last:border-0 last:pb-0 relative">
+                                    <div className="flex-1 space-y-4">
+                                        <FormField
+                                            control={form.control}
+                                            name={`rams.${index}.size` as any}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Capacidad RAM ({index + 1})</FormLabel>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
+                                                        <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
+                                                        <SelectContent>{catalog.ramSizes.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                                                    </Select>
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name={`rams.${index}.type` as any}
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Tecnología ({index + 1})</FormLabel>
+                                                    <Select 
+                                                        onValueChange={(val) => {
+                                                            field.onChange(val);
+                                                            // Sync all modules if it's the first one
+                                                            if (index === 0) {
+                                                                ramFields.forEach((_, i) => {
+                                                                    if (i > 0) form.setValue(`rams.${i}.type` as any, val);
+                                                                });
+                                                            }
+                                                        }} 
+                                                        value={index === 0 ? field.value : firstRamType}
+                                                        disabled={index > 0}
+                                                    >
+                                                        <FormControl><SelectTrigger><SelectValue placeholder="DDR..." /></SelectTrigger></FormControl>
+                                                        <SelectContent>{catalog.ramTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                                    </Select>
+                                                    {index > 0 && <p className="text-[10px] text-muted-foreground italic">Bloqueado para compatibilidad con el primer módulo.</p>}
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {ramFields.length > 1 && (
+                                        <Button type="button" variant="ghost" size="icon" className="text-destructive mb-4" onClick={() => removeRam(index)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Disco Group */}
-                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20">
-                        <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
-                            <HardDrive className="h-3 w-3" /> Almacenamiento
+                    {/* Storage Multi-Unit Section */}
+                    <div className="space-y-4 border p-4 rounded-lg bg-muted/20 md:col-span-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 font-medium text-xs text-muted-foreground uppercase">
+                                <HardDrive className="h-3 w-3" /> Unidades de Almacenamiento
+                            </div>
+                            <Button type="button" variant="outline" size="sm" onClick={() => appendStorage({ size: '', type: '' })}>
+                                <Plus className="h-3 w-3 mr-1" /> Añadir Unidad
+                            </Button>
                         </div>
-                        <FormField
-                        control={form.control}
-                        name="storage"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Capacidad de Disco</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
-                                <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                        <FormField
-                        control={form.control}
-                        name="storageType"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Tipo de Disco</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value as string}>
-                                <FormControl><SelectTrigger><SelectValue placeholder="Tecnología" /></SelectTrigger></FormControl>
-                                <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {storageFields.map((field, index) => (
+                                <div key={field.id} className="p-4 border rounded-md bg-background relative space-y-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-xs font-bold text-primary">UNIDAD {index + 1}</span>
+                                        {storageFields.length > 1 && (
+                                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => removeStorage(index)}>
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name={`storages.${index}.size` as any}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Capacidad</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Capacidad" /></SelectTrigger></FormControl>
+                                                    <SelectContent>{catalog.diskSizes.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                                </Select>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name={`storages.${index}.type` as any}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Tipo de Disco</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Tecnología" /></SelectTrigger></FormControl>
+                                                    <SelectContent>{catalog.diskTypes.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
+                                                </Select>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             )}
@@ -927,8 +994,18 @@ export default function AssetsPage() {
                                                     <CardContent className="grid grid-cols-1 gap-y-3 text-sm">
                                                         <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Hostname:</span><span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span></div>
                                                         <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Procesador:</span><span>{selectedAsset?.processor} {selectedAsset?.processorGen}</span></div>
-                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">RAM:</span><span>{selectedAsset?.ram} {selectedAsset?.ramType}</span></div>
-                                                        <div className="flex justify-between border-b py-1"><span className="text-muted-foreground">Disco:</span><span>{selectedAsset?.storage} {selectedAsset?.storageType}</span></div>
+                                                        <div className="border-b py-1">
+                                                            <span className="text-muted-foreground block mb-1">Memoria RAM:</span>
+                                                            {selectedAsset?.rams?.map((r: any, i: number) => (
+                                                                <Badge key={i} variant="secondary" className="mr-1 mb-1">{r.size} {r.type}</Badge>
+                                                            ))}
+                                                        </div>
+                                                        <div className="border-b py-1">
+                                                            <span className="text-muted-foreground block mb-1">Almacenamiento:</span>
+                                                            {selectedAsset?.storages?.map((s: any, i: number) => (
+                                                                <Badge key={i} variant="outline" className="mr-1 mb-1 border-primary/30">{s.size} {s.type}</Badge>
+                                                            ))}
+                                                        </div>
                                                         <div className="flex justify-between py-1"><span className="text-muted-foreground">Tipo Equipo:</span><span className="capitalize">{selectedAsset?.equipmentType || 'N/A'}</span></div>
                                                     </CardContent>
                                                 </Card>
