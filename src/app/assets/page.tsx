@@ -41,7 +41,6 @@ import {
   ShieldCheck,
   FileText,
   Info,
-  History,
   X,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
@@ -78,7 +77,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import AssetHistory from '@/components/dashboard/asset-history';
