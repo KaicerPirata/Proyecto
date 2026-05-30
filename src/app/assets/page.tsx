@@ -44,6 +44,7 @@ import {
   X,
   History,
   RefreshCcw,
+  Archive,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -333,6 +334,10 @@ function AssetForm({
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 text-sm font-semibold uppercase tracking-wider text-primary border-b pb-2">
+            <FileText className="h-4 w-4 inline mr-2" /> Información de Compra
           </div>
 
           <div className="grid grid-cols-1 gap-6">
@@ -815,7 +820,7 @@ export default function AssetsPage() {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold font-headline">Gestión de Activos</h1>
+              <h1 className="text-3xl font-bold font-headline text-primary">Gestión de Activos</h1>
               <p className="text-muted-foreground">Administración del inventario técnico y ciclo de vida.</p>
             </div>
             {userRole !== 'estandar' && (
