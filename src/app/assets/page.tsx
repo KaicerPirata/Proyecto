@@ -261,15 +261,15 @@ function AssetForm({
 
   const { fields: ramFields, append: appendRam, remove: removeRam } = useFieldArray({
     control: form.control,
-    name: 'rams' as any,
+    name: 'rams',
   });
   
   const { fields: storageFields, append: appendStorage, remove: removeStorage } = useFieldArray({
     control: form.control,
-    name: 'storages' as any,
+    name: 'storages',
   });
 
-  const firstRamType = form.watch('rams.0.type' as any);
+  const firstRamType = form.watch('rams.0.type');
 
   function onSubmit(data: any) {
     toast({ title: isEditMode ? 'Actualizado' : 'Registrado', description: 'Operación exitosa.' });
@@ -379,7 +379,7 @@ function AssetForm({
             <Laptop className="h-4 w-4" /> Especificaciones de Hardware
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <FormField
               control={form.control}
               name="brand"
@@ -434,7 +434,7 @@ function AssetForm({
 
           {isComputer && (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-4">
                 <FormField
                   control={form.control}
                   name="processor"
@@ -496,7 +496,7 @@ function AssetForm({
                   <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
                     <FormField
                       control={form.control}
-                      name={`rams.${index}.size` as any}
+                      name={`rams.${index}.size`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Capacidad RAM ({index + 1})</FormLabel>
@@ -519,7 +519,7 @@ function AssetForm({
                     />
                     <FormField
                       control={form.control}
-                      name={`rams.${index}.type` as any}
+                      name={`rams.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo de RAM ({index + 1})</FormLabel>
@@ -527,7 +527,7 @@ function AssetForm({
                             onValueChange={(val) => {
                               field.onChange(val);
                               if (index === 0) {
-                                ramFields.forEach((_, i) => i > 0 && form.setValue(`rams.${i}.type` as any, val));
+                                ramFields.forEach((_, i) => i > 0 && form.setValue(`rams.${i}.type`, val));
                               }
                             }}
                             value={index === 0 ? field.value : firstRamType}
@@ -572,7 +572,7 @@ function AssetForm({
                   <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
                     <FormField
                       control={form.control}
-                      name={`storages.${index}.size` as any}
+                      name={`storages.${index}.size`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Capacidad Disco ({index + 1})</FormLabel>
@@ -595,7 +595,7 @@ function AssetForm({
                     />
                     <FormField
                       control={form.control}
-                      name={`storages.${index}.type` as any}
+                      name={`storages.${index}.type`}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo de Disco ({index + 1})</FormLabel>
@@ -643,78 +643,80 @@ function AssetForm({
                 )}
               />
 
-              <div className="grid grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="os"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sistema Operativo</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value as string}>
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="os"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sistema Operativo</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar SO" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
+                            <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
+                            <SelectItem value="Linux">Linux</SelectItem>
+                            <SelectItem value="macOS">macOS</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="osKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Clave de Licencia (Windows)</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar SO" />
-                          </SelectTrigger>
+                          <Input {...field} placeholder="XXXXX-XXXXX-..." />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
-                          <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
-                          <SelectItem value="Linux">Linux</SelectItem>
-                          <SelectItem value="macOS">macOS</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="osKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Clave de Licencia (Windows)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="XXXXX-XXXXX-..." />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-              <div className="grid grid-cols-1 gap-6">
-                <FormField
-                  control={form.control}
-                  name="officeVersion"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Versión Office</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value as string}>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="officeVersion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Versión Office</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value as string}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar versión" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="NINGUNO">NINGUNO</SelectItem>
+                            <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
+                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
+                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="officeKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Clave de Licencia (Office)</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar versión" />
-                          </SelectTrigger>
+                          <Input {...field} placeholder="YYYYY-YYYYY-..." />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="NINGUNO">NINGUNO</SelectItem>
-                          <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
-                          <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
-                          <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="officeKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Clave de Licencia (Office)</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="YYYYY-YYYYY-..." />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -963,109 +965,113 @@ export default function AssetsPage() {
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-6">
-                    {/* SECCION DATOS GENERALES */}
                     <Card className="bg-muted/30 p-6 border-none shadow-none">
                       <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
                         <Info className="h-4 w-4" /> Información General
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">Responsable:</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">Responsable</span>
                           <span className="font-bold">{selectedAsset?.responsable}</span>
                         </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">S/N Serial:</span>
-                          <span className="font-code">{selectedAsset?.serialNumber}</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">S/N Serial</span>
+                          <span className="font-code text-primary">{selectedAsset?.serialNumber}</span>
                         </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">Nombre Red (Hostname):</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">Nombre Red (Hostname)</span>
                           <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">Marca / Modelo:</span>
-                          <span>{selectedAsset?.brand} {selectedAsset?.model}</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">Marca / Modelo</span>
+                          <span className="font-bold">{selectedAsset?.brand} {selectedAsset?.model}</span>
                         </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">Nro Factura:</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">Nro Factura</span>
                           <span>{selectedAsset?.invoiceNumber || 'N/A'}</span>
                         </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-muted-foreground">Fecha Compra:</span>
+                        <div className="flex flex-col border-b pb-2">
+                          <span className="text-xs text-muted-foreground uppercase">Fecha Compra</span>
                           <span>{selectedAsset?.purchaseDate}</span>
                         </div>
                       </div>
                     </Card>
 
-                    {/* SECCION HARDWARE (SOLO PARA COMPUTADORES) */}
                     {(selectedAsset?.category === 'Equipo de cómputo' || selectedAsset?.processor) && (
                       <Card className="bg-muted/30 p-6 border-none shadow-none">
                         <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                          <Cpu className="h-4 w-4" /> Especificaciones Técnicas
+                          <Cpu className="h-4 w-4" /> Especificaciones de Hardware
                         </h3>
-                        <div className="space-y-4">
-                          <div className="bg-background p-3 rounded-lg border">
-                            <span className="text-xs text-muted-foreground block mb-1">Unidad de Procesamiento:</span>
-                            <div className="font-bold flex items-center gap-2 text-base">
-                              <Cpu className="h-4 w-4 text-primary" />
-                              {selectedAsset?.processor} <Badge variant="secondary">{selectedAsset?.processorGen}</Badge>
+                        <div className="space-y-6">
+                          <div className="bg-background p-4 rounded-lg border flex flex-col gap-1">
+                            <span className="text-xs font-bold text-muted-foreground uppercase">Procesador e Hilo Técnico</span>
+                            <div className="font-bold flex items-center gap-2 text-lg">
+                              <Cpu className="h-5 w-5 text-primary" />
+                              {selectedAsset?.processor}
+                            </div>
+                            <div className="text-sm text-primary font-medium pl-7">
+                              Generación: {selectedAsset?.processorGen || 'No especificada'}
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-background p-3 rounded-lg border">
-                              <span className="text-xs text-muted-foreground block mb-2">Memoria RAM Instalada:</span>
-                              <div className="space-y-1">
-                                {selectedAsset?.rams?.map((r: any, i: number) => (
-                                  <div key={i} className="flex items-center gap-2">
-                                    <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                                      Módulo {i+1}: {r.size} {r.type}
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
+                          <div className="space-y-3">
+                            <span className="text-xs font-bold text-muted-foreground uppercase block">Configuración de Memoria RAM</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {selectedAsset?.rams?.map((r: any, i: number) => (
+                                <div key={i} className="bg-background p-3 rounded-lg border flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold text-muted-foreground">MÓDULO {i + 1}</span>
+                                  <div className="font-bold text-base">{r.size}</div>
+                                  <div className="text-xs text-primary font-medium">Tecnología: {r.type}</div>
+                                </div>
+                              ))}
                             </div>
-                            <div className="bg-background p-3 rounded-lg border">
-                              <span className="text-xs text-muted-foreground block mb-2">Unidades de Almacenamiento:</span>
-                              <div className="space-y-1">
-                                {selectedAsset?.storages?.map((s: any, i: number) => (
-                                  <div key={i} className="flex items-center gap-2">
-                                    <Badge variant="outline" className="border-accent/40 text-accent-foreground">
-                                      Unidad {i+1}: {s.size} {s.type}
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <span className="text-xs font-bold text-muted-foreground uppercase block">Unidades de Almacenamiento</span>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {selectedAsset?.storages?.map((s: any, i: number) => (
+                                <div key={i} className="bg-background p-3 rounded-lg border flex flex-col gap-1">
+                                  <span className="text-[10px] font-bold text-muted-foreground">DISCO {i + 1}</span>
+                                  <div className="font-bold text-base">{s.size}</div>
+                                  <div className="text-xs text-accent font-medium">Tipo: {s.type}</div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </div>
                       </Card>
                     )}
 
-                    {/* SECCION SOFTWARE Y LICENCIAS (SOLO PARA ADMIN/TECNICO) */}
                     {(userRole === 'admin' || userRole === 'tecnico') && (selectedAsset?.category === 'Equipo de cómputo') && (
                       <Card className="bg-muted/30 p-6 border-none shadow-none">
                         <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
-                          <ShieldCheck className="h-4 w-4" /> Licenciamiento y Seguridad
+                          <ShieldCheck className="h-4 w-4" /> Software & Licenciamiento
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="p-3 bg-background rounded-lg border">
-                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-2">
-                              <Monitor className="h-3 w-3" /> SISTEMA OPERATIVO
+                        <div className="grid grid-cols-1 gap-6">
+                          <div className="p-4 bg-background rounded-lg border space-y-3">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
+                                <Monitor className="h-3 w-3" /> Sistema Operativo
+                              </span>
+                              <p className="font-bold text-lg">{selectedAsset?.os}</p>
                             </div>
-                            <p className="font-bold">{selectedAsset?.os}</p>
-                            <div className="mt-2 p-2 bg-muted/50 rounded font-code text-xs break-all">
-                              <span className="text-muted-foreground block mb-1">Serial Key:</span>
-                              {selectedAsset?.osKey || 'LICENCIA OEM / DIGITAL'}
+                            <div className="p-3 bg-muted/50 rounded-md border-l-4 border-primary">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Licencia)</span>
+                              <p className="font-code text-sm break-all">{selectedAsset?.osKey || 'LICENCIA DIGITAL / OEM'}</p>
                             </div>
                           </div>
-                          <div className="p-3 bg-background rounded-lg border">
-                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-2">
-                              <FileText className="h-3 w-3" /> MICROSOFT OFFICE
+
+                          <div className="p-4 bg-background rounded-lg border space-y-3">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-muted-foreground uppercase flex items-center gap-2">
+                                <FileText className="h-3 w-3" /> Microsoft Office
+                              </span>
+                              <p className="font-bold text-lg">{selectedAsset?.officeVersion}</p>
                             </div>
-                            <p className="font-bold">{selectedAsset?.officeVersion}</p>
-                            <div className="mt-2 p-2 bg-muted/50 rounded font-code text-xs break-all">
-                              <span className="text-muted-foreground block mb-1">Serial Key:</span>
-                              {selectedAsset?.officeKey || 'SIN LICENCIA REGISTRADA'}
+                            <div className="p-3 bg-muted/50 rounded-md border-l-4 border-accent">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase block mb-1">Product Key (Licencia)</span>
+                              <p className="font-code text-sm break-all">{selectedAsset?.officeKey || 'SIN LICENCIA REGISTRADA'}</p>
                             </div>
                           </div>
                         </div>
@@ -1077,13 +1083,13 @@ export default function AssetsPage() {
                     {userRole !== 'estandar' && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="font-bold text-sm">Registro de Intervenciones Técnicas</h4>
+                          <h4 className="font-bold text-sm">Intervenciones Técnicas</h4>
                           <Button 
                             variant={isAddingHistory ? 'ghost' : 'default'} 
                             size="sm" 
                             onClick={() => setIsAddingHistory(!isAddingHistory)}
                           >
-                            {isAddingHistory ? 'Cancelar' : 'Añadir Mantenimiento / Incidente'}
+                            {isAddingHistory ? 'Cancelar' : 'Nuevo Registro'}
                           </Button>
                         </div>
                         {isAddingHistory && (
