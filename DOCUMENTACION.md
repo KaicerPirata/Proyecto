@@ -1,4 +1,3 @@
-
 # Documentación Técnica del Sistema "Activos Pro"
 
 ## 1. Arquitectura de la Aplicación
@@ -20,7 +19,7 @@ El sistema implementa reglas de integridad física para el inventario:
 - **Independencia de Tecnología**: Permite registrar múltiples discos (ej: un M.2 para sistema y un HDD para datos) permitiendo que cada unidad tenga su propio tipo y capacidad de forma independiente.
 
 ### 2.3. Hoja de Vida Técnica
-- Los roles de **Administrador** y **Técnico** tienen acceso a una vista detallada que desglosa cada componente de hardware y licencias de software, permitiendo una trazabilidad completa del activo.
+- Los roles de **Administrador** y **Técnico** tienen acceso a una vista detallada que desglosa cada componente de hardware y licencias de software (Keys), permitiendo una trazabilidad completa del activo.
 
 ## 3. Control de Acceso (RBAC)
 - **Admin**: Control total.
