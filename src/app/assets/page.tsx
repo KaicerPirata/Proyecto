@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -40,6 +41,7 @@ import {
   Plus,
   ShieldCheck,
   FileText,
+  Info,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -222,12 +224,12 @@ function AssetForm({
 }) {
   const { toast } = useToast();
   const isEditMode = !!assetToEdit;
-  const isComputer = assetType === 'Equipo de cómputo';
+  const isComputer = assetType === 'Equipo de cómputo' || assetToEdit?.category === 'Equipo de cómputo';
   const schema = isComputer ? computerAssetSchema : simpleAssetSchema;
 
   const defaultValues = useMemo(() => {
     if (isEditMode) {
-      return { ...assetToEdit, purchaseDate: new Date(assetToEdit.purchaseDate) };
+      return { ...assetToEdit, purchaseDate: assetToEdit.purchaseDate ? new Date(assetToEdit.purchaseDate) : new Date() };
     }
     if (isComputer) {
       return {
@@ -432,73 +434,66 @@ function AssetForm({
 
           {isComputer && (
             <div className="space-y-8">
-              {/* PROCESADOR VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                  <Cpu className="h-4 w-4" /> Unidad de Procesamiento (CPU)
-                </div>
-                <div className="flex flex-col gap-6">
-                  <FormField
-                    control={form.control}
-                    name="processor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Procesador</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value as string}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar CPU" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {catalog.processors.map((p) => (
-                              <SelectItem key={p} value={p}>
-                                {p}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="processorGen"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Generación</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value as string}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar generación" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {catalog.processorGenerations.map((g) => (
-                              <SelectItem key={g} value={g}>
-                                {g}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-6">
+                <FormField
+                  control={form.control}
+                  name="processor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Procesador</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar CPU" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {catalog.processors.map((p) => (
+                            <SelectItem key={p} value={p}>
+                              {p}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="processorGen"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Generación del Procesador</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value as string}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar generación" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {catalog.processorGenerations.map((g) => (
+                            <SelectItem key={g} value={g}>
+                              {g}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* RAM VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
+                  <h4 className="text-sm font-bold flex items-center gap-2">
                     <Cpu className="h-4 w-4" /> Memoria RAM
-                  </div>
+                  </h4>
                   <Button type="button" variant="outline" size="sm" onClick={() => appendRam({ size: '', type: firstRamType || '' })}>
-                    <Plus className="h-4 w-4 mr-2" /> Añadir Módulo
+                    <Plus className="h-3 w-3 mr-2" /> Añadir RAM
                   </Button>
                 </div>
                 {ramFields.map((item, index) => (
-                  <div key={item.id} className="flex flex-col gap-6 border-b pb-6 last:border-0 last:pb-0 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`rams.${index}.size` as any}
@@ -551,12 +546,12 @@ function AssetForm({
                               ))}
                             </SelectContent>
                           </Select>
-                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Bloqueado para coincidir con el primer módulo.</p>}
+                          {index > 0 && <p className="text-[10px] text-muted-foreground italic">Bloqueado para compatibilidad.</p>}
                         </FormItem>
                       )}
                     />
                     {ramFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-0 top-0 text-destructive" onClick={() => removeRam(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeRam(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -564,18 +559,17 @@ function AssetForm({
                 ))}
               </div>
 
-              {/* DISCO VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                    <HardDrive className="h-4 w-4" /> Unidades de Disco
-                  </div>
+                  <h4 className="text-sm font-bold flex items-center gap-2">
+                    <HardDrive className="h-4 w-4" /> Almacenamiento
+                  </h4>
                   <Button type="button" variant="outline" size="sm" onClick={() => appendStorage({ size: '', type: '' })}>
-                    <Plus className="h-4 w-4 mr-2" /> Añadir Disco
+                    <Plus className="h-3 w-3 mr-2" /> Añadir Disco
                   </Button>
                 </div>
                 {storageFields.map((item, index) => (
-                  <div key={item.id} className="flex flex-col gap-6 border-b pb-6 last:border-0 last:pb-0 relative">
+                  <div key={item.id} className="grid grid-cols-1 gap-4 p-4 border rounded-lg bg-muted/20 relative">
                     <FormField
                       control={form.control}
                       name={`storages.${index}.size` as any}
@@ -623,7 +617,7 @@ function AssetForm({
                       )}
                     />
                     {storageFields.length > 1 && (
-                      <Button variant="ghost" size="icon" className="absolute right-0 top-0 text-destructive" onClick={() => removeStorage(index)}>
+                      <Button variant="ghost" size="icon" className="absolute right-2 top-2 text-destructive" onClick={() => removeStorage(index)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
@@ -632,7 +626,6 @@ function AssetForm({
               </div>
 
               <Separator />
-              
               <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-wider text-primary">
                 <Network className="h-4 w-4" /> Software & Red
               </div>
@@ -644,96 +637,84 @@ function AssetForm({
                   <FormItem>
                     <FormLabel>Hostname (Nombre en Red)</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Ej: PC-TEC-01" />
+                      <Input {...field} />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              {/* SO VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                  <ShieldCheck className="h-4 w-4" /> Sistema Operativo
-                </div>
-                <div className="flex flex-col gap-6">
-                  <FormField
-                    control={form.control}
-                    name="os"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Versión Sistema Operativo</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value as string}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar SO" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
-                            <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
-                            <SelectItem value="Linux">Linux</SelectItem>
-                            <SelectItem value="macOS">macOS</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="osKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Clave de Licencia (SO)</FormLabel>
+              <div className="grid grid-cols-1 gap-6">
+                <FormField
+                  control={form.control}
+                  name="os"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sistema Operativo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value as string}>
                         <FormControl>
-                          <Input {...field} placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar SO" />
+                          </SelectTrigger>
                         </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          <SelectItem value="Windows 10 Pro">Windows 10 Pro</SelectItem>
+                          <SelectItem value="Windows 11 Pro">Windows 11 Pro</SelectItem>
+                          <SelectItem value="Linux">Linux</SelectItem>
+                          <SelectItem value="macOS">macOS</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="osKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Clave de Licencia (Windows)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="XXXXX-XXXXX-..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* OFFICE VERTICAL */}
-              <div className="border p-6 rounded-xl bg-muted/20 space-y-6">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase">
-                  <FileText className="h-4 w-4" /> Paquete Microsoft Office
-                </div>
-                <div className="flex flex-col gap-6">
-                  <FormField
-                    control={form.control}
-                    name="officeVersion"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Versión Office</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value as string}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar versión" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="NINGUNO">NINGUNO</SelectItem>
-                            <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
-                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
-                            <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="officeKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Clave de Licencia (Office)</FormLabel>
+              <div className="grid grid-cols-1 gap-6">
+                <FormField
+                  control={form.control}
+                  name="officeVersion"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Versión Office</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value as string}>
                         <FormControl>
-                          <Input {...field} placeholder="YYYYY-YYYYY-YYYYY-YYYYY-YYYYY" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar versión" />
+                          </SelectTrigger>
                         </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          <SelectItem value="NINGUNO">NINGUNO</SelectItem>
+                          <SelectItem value="OFFICE 365">OFFICE 365</SelectItem>
+                          <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2021">OFFICE 2021</SelectItem>
+                          <SelectItem value="MICROSOFT OFFICE HOGAR Y EMPRESAS 2019">OFFICE 2019</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="officeKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Clave de Licencia (Office)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="YYYYY-YYYYY-..." />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
           )}
@@ -746,14 +727,14 @@ function AssetForm({
                 <FormItem>
                   <FormLabel>Notas / Descripción</FormLabel>
                   <FormControl>
-                    <Textarea {...field} placeholder="Detalles adicionales del equipo..." />
+                    <Textarea {...field} />
                   </FormControl>
                 </FormItem>
               )}
             />
           )}
 
-          <Button type="submit" className="w-full h-14 text-lg font-bold shadow-lg hover:shadow-xl transition-all">
+          <Button type="submit" className="w-full">
             {isEditMode ? 'Actualizar Información' : 'Registrar en Inventario'}
           </Button>
         </form>
@@ -954,15 +935,15 @@ export default function AssetsPage() {
               <div className="flex justify-between items-center border-b pb-4">
                 <DialogTitle className="text-2xl font-headline flex items-center gap-3">
                   <FileText className="h-6 w-6 text-primary" />
-                  Hoja de Vida: {selectedAsset?.id}
+                  Hoja de Vida Técnica: {selectedAsset?.id}
                 </DialogTitle>
                 <div className="flex gap-2">
                   <Button variant="outline">
-                    <Download className="h-4 w-4 mr-2" /> PDF
+                    <Download className="h-4 w-4 mr-2" /> Descargar PDF
                   </Button>
                   {userRole !== 'estandar' && !isEditing && (
                     <Button onClick={() => setIsEditing(true)}>
-                      <Pencil className="h-4 w-4 mr-2" /> Editar
+                      <Pencil className="h-4 w-4 mr-2" /> Editar Equipo
                     </Button>
                   )}
                 </div>
@@ -974,84 +955,149 @@ export default function AssetsPage() {
                   assetType={selectedAsset?.category}
                   assetToEdit={selectedAsset}
                   onBack={() => setIsEditing(false)}
-                  onSaveSuccess={() => setIsDetailsOpen(false)}
+                  onSaveSuccess={() => {
+                    setIsEditing(false);
+                    setIsDetailsOpen(false);
+                  }}
                 />
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card className="bg-muted/30 p-4 border-none shadow-none">
-                        <h3 className="text-xs font-bold text-primary uppercase mb-3 flex items-center gap-2">
-                          <Network className="h-3 w-3" /> Datos Generales
+                    {/* SECCION DATOS GENERALES */}
+                    <Card className="bg-muted/30 p-6 border-none shadow-none">
+                      <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
+                        <Info className="h-4 w-4" /> Información General
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">Responsable:</span>
+                          <span className="font-bold">{selectedAsset?.responsable}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">S/N Serial:</span>
+                          <span className="font-code">{selectedAsset?.serialNumber}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">Nombre Red (Hostname):</span>
+                          <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">Marca / Modelo:</span>
+                          <span>{selectedAsset?.brand} {selectedAsset?.model}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">Nro Factura:</span>
+                          <span>{selectedAsset?.invoiceNumber || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between border-b pb-1">
+                          <span className="text-muted-foreground">Fecha Compra:</span>
+                          <span>{selectedAsset?.purchaseDate}</span>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* SECCION HARDWARE (SOLO PARA COMPUTADORES) */}
+                    {(selectedAsset?.category === 'Equipo de cómputo' || selectedAsset?.processor) && (
+                      <Card className="bg-muted/30 p-6 border-none shadow-none">
+                        <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
+                          <Cpu className="h-4 w-4" /> Especificaciones Técnicas
                         </h3>
-                        <div className="text-sm space-y-2">
-                          <div className="flex justify-between">
-                            <span>Responsable:</span>
-                            <span className="font-bold">{selectedAsset?.responsable}</span>
+                        <div className="space-y-4">
+                          <div className="bg-background p-3 rounded-lg border">
+                            <span className="text-xs text-muted-foreground block mb-1">Unidad de Procesamiento:</span>
+                            <div className="font-bold flex items-center gap-2 text-base">
+                              <Cpu className="h-4 w-4 text-primary" />
+                              {selectedAsset?.processor} <Badge variant="secondary">{selectedAsset?.processorGen}</Badge>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Serial:</span>
-                            <span className="font-code text-xs">{selectedAsset?.serialNumber}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Hostname:</span>
-                            <span className="font-bold">{selectedAsset?.networkName || 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>F. Compra:</span>
-                            <span>{selectedAsset?.purchaseDate}</span>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-background p-3 rounded-lg border">
+                              <span className="text-xs text-muted-foreground block mb-2">Memoria RAM Instalada:</span>
+                              <div className="space-y-1">
+                                {selectedAsset?.rams?.map((r: any, i: number) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                                      Módulo {i+1}: {r.size} {r.type}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="bg-background p-3 rounded-lg border">
+                              <span className="text-xs text-muted-foreground block mb-2">Unidades de Almacenamiento:</span>
+                              <div className="space-y-1">
+                                {selectedAsset?.storages?.map((s: any, i: number) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <Badge variant="outline" className="border-accent/40 text-accent-foreground">
+                                      Unidad {i+1}: {s.size} {s.type}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </Card>
-                      {selectedAsset?.category === 'Equipo de cómputo' && (
-                        <Card className="bg-muted/30 p-4 border-none shadow-none">
-                          <h3 className="text-xs font-bold text-primary uppercase mb-3 flex items-center gap-2">
-                            <Cpu className="h-3 w-3" /> Hardware Instalado
-                          </h3>
-                          <div className="text-sm space-y-3">
-                            <div>
-                              <span className="text-muted-foreground text-xs block">Procesador:</span>
-                              <b>
-                                {selectedAsset?.processor} {selectedAsset?.processorGen}
-                              </b>
+                    )}
+
+                    {/* SECCION SOFTWARE Y LICENCIAS (SOLO PARA ADMIN/TECNICO) */}
+                    {(userRole === 'admin' || userRole === 'tecnico') && (selectedAsset?.category === 'Equipo de cómputo') && (
+                      <Card className="bg-muted/30 p-6 border-none shadow-none">
+                        <h3 className="text-sm font-bold text-primary uppercase mb-4 flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4" /> Licenciamiento y Seguridad
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-3 bg-background rounded-lg border">
+                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-2">
+                              <Monitor className="h-3 w-3" /> SISTEMA OPERATIVO
                             </div>
-                            <div>
-                              <span className="text-muted-foreground text-xs block">Memoria RAM:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {selectedAsset?.rams?.map((r: any, i: number) => (
-                                  <Badge key={i} variant="secondary">
-                                    {r.size} {r.type}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <span className="text-muted-foreground text-xs block">Almacenamiento:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {selectedAsset?.storages?.map((s: any, i: number) => (
-                                  <Badge key={i} variant="outline">
-                                    {s.size} {s.type}
-                                  </Badge>
-                                ))}
-                              </div>
+                            <p className="font-bold">{selectedAsset?.os}</p>
+                            <div className="mt-2 p-2 bg-muted/50 rounded font-code text-xs break-all">
+                              <span className="text-muted-foreground block mb-1">Serial Key:</span>
+                              {selectedAsset?.osKey || 'LICENCIA OEM / DIGITAL'}
                             </div>
                           </div>
-                        </Card>
-                      )}
-                    </div>
+                          <div className="p-3 bg-background rounded-lg border">
+                            <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground mb-2">
+                              <FileText className="h-3 w-3" /> MICROSOFT OFFICE
+                            </div>
+                            <p className="font-bold">{selectedAsset?.officeVersion}</p>
+                            <div className="mt-2 p-2 bg-muted/50 rounded font-code text-xs break-all">
+                              <span className="text-muted-foreground block mb-1">Serial Key:</span>
+                              {selectedAsset?.officeKey || 'SIN LICENCIA REGISTRADA'}
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+
                     <Separator />
+                    
                     {userRole !== 'estandar' && (
                       <div className="space-y-4">
                         <div className="flex justify-between items-center">
-                          <h4 className="font-bold text-sm">Registro de Mantenimiento</h4>
-                          <Button variant={isAddingHistory ? 'ghost' : 'default'} size="sm" onClick={() => setIsAddingHistory(!isAddingHistory)}>
-                            {isAddingHistory ? 'Cerrar' : 'Nueva Intervención'}
+                          <h4 className="font-bold text-sm">Registro de Intervenciones Técnicas</h4>
+                          <Button 
+                            variant={isAddingHistory ? 'ghost' : 'default'} 
+                            size="sm" 
+                            onClick={() => setIsAddingHistory(!isAddingHistory)}
+                          >
+                            {isAddingHistory ? 'Cancelar' : 'Añadir Mantenimiento / Incidente'}
                           </Button>
                         </div>
-                        {isAddingHistory && <AddHistoryForm assetId={selectedAsset?.id} onSaveSuccess={() => setIsAddingHistory(false)} />}
+                        {isAddingHistory && (
+                          <div className="border p-6 rounded-xl bg-card shadow-sm">
+                            <AddHistoryForm 
+                              assetId={selectedAsset?.id} 
+                              onSaveSuccess={() => setIsAddingHistory(false)} 
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
+
                   <div className="lg:col-span-1">
                     <AssetHistory assetId={selectedAsset?.id} />
                   </div>
@@ -1064,3 +1110,4 @@ export default function AssetsPage() {
     </DashboardLayout>
   );
 }
+
