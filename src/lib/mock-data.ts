@@ -38,6 +38,7 @@ export const assets = [
     osKey: 'XXXXX-XXXXX-XXXXX-XXXXX-ABCDE',
     officeVersion: 'MICROSOFT OFFICE HOGAR Y EMPRESAS 2021',
     officeKey: 'YYYYY-YYYYY-YYYYY-YYYYY-FGHIJ',
+    networkName: 'PC-TEC-01'
   },
   {
     id: 'MON-002',
@@ -68,42 +69,6 @@ export const assets = [
     brand: 'APC',
     model: 'Smart-UPS 1500',
     description: 'Batería reemplazada en Enero 2024.',
-  },
-  {
-    id: 'LAP-002',
-    name: 'Laptop HP Elitebook',
-    category: 'Equipo de cómputo',
-    status: 'Asignado',
-    company: 'HYCO',
-    responsable: 'Carlos Fierro',
-    city: 'Cali',
-    serialNumber: 'HP-ELITE-002',
-    purchaseDate: '2023-08-20',
-    brand: 'HP',
-    model: 'Elitebook 840 G8',
-    processor: 'Intel Core i5',
-    processorGen: '11va Gen',
-    rams: [{ size: '16 GB', type: 'DDR4' }],
-    storages: [{ size: '512 GB', type: 'SSD' }],
-    os: 'Windows 11 Pro',
-  },
-  {
-    id: 'LAP-003',
-    name: 'Laptop Lenovo ThinkPad',
-    category: 'Equipo de cómputo',
-    status: 'Asignado',
-    company: 'HYCO',
-    responsable: 'Daniela Manyoma',
-    city: 'Cali',
-    serialNumber: 'LEN-TP-003',
-    purchaseDate: '2024-02-10',
-    brand: 'Lenovo',
-    model: 'ThinkPad T14',
-    processor: 'AMD Ryzen 5',
-    processorGen: '5ta Gen',
-    rams: [{ size: '16 GB', type: 'DDR4' }],
-    storages: [{ size: '512 GB', type: 'SSD' }],
-    os: 'Windows 11 Pro',
   }
 ];
 
@@ -116,39 +81,19 @@ export const assetHistory = {
          { id: '3', date: '2024-02-01', author: 'William Aguilera', type: 'Instalación', description: 'Instalación de paquete de Adobe Creative Cloud.' },
     ],
     'UPS-001': [
-        { id: '4', date: '2024-07-20', author: 'Almacén', type: 'Asignación', description: 'Activo asignado a Carlos Fierro (Ventas).' },
         { id: '5', date: '2024-01-10', author: 'Dylam Moralez', type: 'Mantenimiento', description: 'Revisión de batería y limpieza.' },
-    ],
-    'LAP-002': [
-        { id: '6', date: '2024-02-25', author: 'Almacén', type: 'Mantenimiento', description: 'Mantenimiento preventivo general.' },
-    ],
-    'LAP-003': [
-        { id: '7', date: '2024-06-01', author: 'William Aguilera', type: 'Instalación', description: 'Configuración inicial de equipo y software base.' },
     ]
 };
 
-
-export const deletedAssets = [
-    {
-      id: 'LAP-000',
-      name: 'Laptop HP Probook',
-      category: 'Equipo de cómputo',
-      deletionDate: '2023-10-29',
-      reason: 'Dañado sin reparación',
-    },
-];
+export const deletedAssets = [];
 
 export const users = [
     { id: '1', name: 'William Aguilera', company: 'PALLOMARO S.A', department: 'Tecnología', idNumber: '1144172797' },
     { id: '2', name: 'Dylam Moralez', company: 'FUNDIMETAL', department: 'Operaciones', idNumber: '555555555' },
     { id: '3', name: 'Carlos Fierro', company: 'HYCO', department: 'Ventas', idNumber: '666666666' },
-    { id: '4', name: 'Almacén', company: 'PALLOMARO S.A', department: 'Logística', idNumber: '0000' },
     { id: '5', name: 'Whashintong Palma', company: 'PALLOMARO S.A', department: 'Tecnología', idNumber: '94432420' },
-    { id: '6', name: 'Johana Fuentes', company: 'PALLOMARO S.A', department: 'Administración', idNumber: '111111111' },
-    { id: '7', name: 'Claudia Moreno', company: 'HYCO', department: 'Gerencia', idNumber: '222222222' },
-    { id: '8', name: 'Wilson Rojas', company: 'FUNDIMETAL', department: 'Producción', idNumber: '333333333' },
     { id: '9', name: 'Daniela Manyoma', company: 'HYCO', department: 'Contabilidad', idNumber: '123456789' }
-  ];
+];
 
 export const companies = [
     { id: 1, companyId: 'EMP001', name: 'PALLOMARO S.A', city: 'Cali' },
