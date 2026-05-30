@@ -45,6 +45,7 @@ import {
   History,
   RefreshCcw,
   Archive,
+  Filter,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard-layout';
 import Header from '@/components/dashboard/header';
@@ -86,7 +87,8 @@ import AssetHistory from '@/components/dashboard/asset-history';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, catalog } from '@/lib/mock-data';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { assets as initialAssets, deletedAssets as initialDeletedAssets, users, catalog, companies } from '@/lib/mock-data';
 
 const computerAssetSchema = z.object({
   responsable: z.string().min(1, 'El responsable es requerido.'),
@@ -337,7 +339,9 @@ function AssetForm({
           </div>
 
           <div className="grid grid-cols-1 gap-6 text-sm font-semibold uppercase tracking-wider text-primary border-b pb-2">
-            <FileText className="h-4 w-4 inline mr-2" /> Información de Compra
+            <div className="flex items-center">
+               <FileText className="h-4 w-4 inline mr-2" /> Información de Compra
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
@@ -763,6 +767,13 @@ export default function AssetsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingHistory, setIsAddingHistory] = useState(false);
 
+  const [advancedFilters, setAdvancedFilters] = useState({
+    responsable: '',
+    company: '',
+    category: '',
+    status: '',
+  });
+
   useEffect(() => {
     setUserRole(localStorage.getItem('userRole'));
     setUserName(localStorage.getItem('userName'));
@@ -780,11 +791,20 @@ export default function AssetsPage() {
 
   const filteredAssets = useMemo(() => {
     let list = userRole === 'estandar' ? assets.filter((a) => a.responsable === userName) : assets;
+    
+    // Apply search term
     if (searchTerm) {
       list = list.filter((a) => Object.values(a).some((v) => String(v).toLowerCase().includes(searchTerm.toLowerCase())));
     }
+
+    // Apply advanced filters
+    if (advancedFilters.responsable) list = list.filter(a => a.responsable === advancedFilters.responsable);
+    if (advancedFilters.company) list = list.filter(a => a.company === advancedFilters.company);
+    if (advancedFilters.category) list = list.filter(a => a.category === advancedFilters.category);
+    if (advancedFilters.status) list = list.filter(a => a.status === advancedFilters.status);
+
     return list;
-  }, [assets, userRole, userName, searchTerm]);
+  }, [assets, userRole, userName, searchTerm, advancedFilters]);
 
   const filteredDeletedAssets = useMemo(() => {
     let list = deletedAssets;
@@ -893,7 +913,79 @@ export default function AssetsPage() {
 
             <TabsContent value="list">
               <Card>
-                <CardContent className="pt-6">
+                <CardHeader>
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="advanced-search" className="border-none">
+                      <AccordionTrigger className="hover:no-underline py-0">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                          <Filter className="h-4 w-4" /> Búsqueda Avanzada
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs">Responsable</Label>
+                            <Select value={advancedFilters.responsable} onValueChange={(v) => setAdvancedFilters(f => ({ ...f, responsable: v }))}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Todos" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Todos</SelectItem>
+                                {users.map(u => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Empresa</Label>
+                            <Select value={advancedFilters.company} onValueChange={(v) => setAdvancedFilters(f => ({ ...f, company: v }))}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Todas" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Todas</SelectItem>
+                                {companies.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Categoría</Label>
+                            <Select value={advancedFilters.category} onValueChange={(v) => setAdvancedFilters(f => ({ ...f, category: v }))}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Todas" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Todas</SelectItem>
+                                <SelectItem value="Equipo de cómputo">Computador</SelectItem>
+                                <SelectItem value="Monitor">Monitor</SelectItem>
+                                <SelectItem value="UPS">UPS</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs">Estado</Label>
+                            <Select value={advancedFilters.status} onValueChange={(v) => setAdvancedFilters(f => ({ ...f, status: v }))}>
+                              <SelectTrigger className="h-8 text-xs">
+                                <SelectValue placeholder="Todos" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Todos</SelectItem>
+                                <SelectItem value="Asignado">Asignado</SelectItem>
+                                <SelectItem value="En Almacén">En Almacén</SelectItem>
+                                <SelectItem value="Mantenimiento">Mantenimiento</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex justify-end mt-4">
+                           <Button variant="ghost" size="sm" onClick={() => setAdvancedFilters({ responsable: '', company: '', category: '', status: '' })}>
+                             Limpiar Filtros
+                           </Button>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </CardHeader>
+                <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
