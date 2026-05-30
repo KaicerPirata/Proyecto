@@ -4,23 +4,25 @@
 ## 1. Arquitectura de la Aplicación
 El sistema está construido bajo una arquitectura de **Frontend-First** con **Next.js 15**, utilizando el patrón de diseño de **Componentes Atómicos**. La lógica se divide en cuatro capas fundamentales:
 
-- **Capa de Presentación (UI)**: Desarrollada con React, Tailwind CSS y la librería ShadCN UI para una interfaz profesional y accesible.
+- **Capa de Presentación (UI)**: Desarrollada con React, Tailwind CSS y la librería ShadCN UI. Se implementó un diseño de formulario **estrictamente vertical** para mejorar la legibilidad técnica.
 - **Capa de Negocio (Logic)**: Gestión de estado mediante hooks de React y validación estricta de esquemas de datos con Zod.
-- **Capa de Datos (Mock DB)**: Implementación de una base de datos simulada centralizada (`mock-data.ts`) que gestiona la persistencia en memoria durante la sesión.
-- **Capa de AI (Genkit)**: Integración con Genkit para análisis predictivo de mantenimientos y asistencia inteligente (opcional).
+- **Capa de Datos (Mock DB)**: Implementación de una base de datos simulada centralizada (`mock-data.ts`).
+- **Capa de AI (Genkit)**: Integración lista para análisis predictivo.
 
-## 2. Modelo Relacional de Datos (Entidad-Relación)
-El sistema gestiona la integridad referencial a través de las siguientes entidades lógicas:
+## 2. Lógica de Hardware Avanzada
+El sistema implementa reglas de integridad física para el inventario:
 
-- **Empresa (PK: id)**: Entidad maestra que agrupa usuarios y activos por cliente corporativo.
-- **Usuario (PK: idNumber, FK: companyName)**: Entidades con roles (Admin, Técnico, Estándar) que definen el acceso mediante RBAC (Role-Based Access Control).
-- **Activo (PK: id, FK: responsableName)**: Entidad central que registra hardware (CPU, RAM, Discos) y software (Licencias, Hostname).
-- **HistorialActivo (PK: id, FK: assetId)**: Trazabilidad cronológica de intervenciones técnicas e incidentes.
-- **Catálogo Técnico**: Motor de estandarización que provee los valores válidos para el registro de hardware, evitando la fragmentación de datos.
+### 2.1. Gestión de Memoria RAM (Integridad de Bus)
+- **Multi-módulo**: Soporte para N cantidad de módulos.
+- **Compatibilidad**: El sistema captura el tipo de RAM (DDR) del primer módulo y lo bloquea/aplica automáticamente a los módulos subsiguientes. Esto previene errores humanos al registrar memorias con buses incompatibles en un mismo equipo.
 
-## 3. Lógica de Negocio Específica
-### 3.1. Gestión Multi-Hardware
-El sistema permite el registro de múltiples unidades de RAM y Disco para un solo activo. Implementa una regla de validación de negocio donde la RAM secundaria debe ser obligatoriamente del mismo tipo (DDR) que el módulo primario para garantizar la compatibilidad física.
+### 2.2. Gestión de Almacenamiento (Multi-Unidad)
+- **Independencia de Tecnología**: Permite registrar múltiples discos (ej: un M.2 para sistema y un HDD para datos) permitiendo que cada unidad tenga su propio tipo y capacidad de forma independiente.
 
-### 3.2. Gestión de Ciclo de Vida
-Los activos no se eliminan físicamente del sistema, sino que se marcan como "Bajas" en un histórico, conservando toda su hoja de vida técnica para auditorías futuras.
+### 2.3. Hoja de Vida Técnica
+- Los roles de **Administrador** y **Técnico** tienen acceso a una vista detallada que desglosa cada componente de hardware y licencias de software, permitiendo una trazabilidad completa del activo.
+
+## 3. Control de Acceso (RBAC)
+- **Admin**: Control total.
+- **Técnico**: Gestión de activos y usuarios (sin gestión de empresas).
+- **Estándar**: Consulta exclusiva de activos asignados.
